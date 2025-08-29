@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TR(i)P Lab | Our Research</title>
+
+  <link rel="stylesheet" href="https://molstar.org/viewer/molstar.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --primary-background:#1A202C; --content-background:#2D3748;
+      --main-text-color:#A0AEC0; --header-color:#FFFFFF;
+      --accent-color:#F6E05E; --subtle-border:#4A5568;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;line-height:1.8;color:var(--main-text-color);background:var(--primary-background);}
+
+    header{position:fixed;top:0;left:0;right:0;z-index:1000;padding:1.5rem 0; background: rgba(26, 32, 44, 0.8); backdrop-filter: blur(10px);}
+    nav{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:0 2rem}
+    .logo{font-size:1.5rem;font-weight:700;color:var(--header-color);}
+    .logo .logo-i{color:var(--accent-color);font-style:italic}
+    .nav-links{display:flex;gap:1rem;list-style:none}
+    .nav-links a{text-decoration:none;color:var(--header-color);font-weight:600;padding:.5rem 1rem;border-radius:8px;transition:all .3s}
+    .nav-links a:hover{background:var(--content-background);color:var(--accent-color);transform:translateY(-3px)}
+
+    main{position:relative;z-index:2; margin-top: 100px;}
+    .container{max-width:1100px;margin:0 auto;padding:0 2rem}
+    .page-title{text-align:center;font-size:3.5rem;font-weight:600;color:var(--header-color);margin-bottom:1rem}
+    .page-subtitle{text-align:center;font-size:1.2rem;max-width:600px;margin:0 auto 4rem;}
+
+    .metabolic-spine { position: relative; padding: 4rem 0; }
+    .spine-line { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 4px; height: 100%; background: var(--subtle-border); z-index: 1; }
+    .research-capsule { 
+        position: relative; 
+        z-index: 2; 
+        width: 45%; 
+        margin-bottom: 4rem; 
+        padding: 2rem; 
+        background: var(--content-background); 
+        border-radius: 12px; 
+        border-left: 4px solid var(--accent-color); 
+        opacity: 0;
+        transform: translateY(50px);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .research-capsule.visible { opacity: 1; transform: translateY(0); }
+    .research-capsule:nth-child(odd) { left: 5%; }
+    .research-capsule:nth-child(even) { left: 50%; }
+    .research-capsule::after { 
+        content: ''; 
+        position: absolute; 
+        top: 50%; 
+        width: 20px; 
+        height: 4px; 
+        background: var(--accent-color); 
+    }
+    .research-capsule:nth-child(odd)::after { right: -2rem; }
+    .research-capsule:nth-child(even)::after { left: -2rem; }
+
+    .research-capsule h2 { font-size: 2rem; color: var(--header-color); margin-bottom: 1rem; }
+    .research-capsule .publication-link { display: inline-block; margin-top: 1rem; color: var(--accent-color); text-decoration: none; font-weight: 600; }
+    .research-capsule .publication-link:hover { text-decoration: underline; }
+    .research-capsule .research-media { margin-top: 1.5rem; }
+    .research-capsule img, .research-capsule video { max-width: 100%; border-radius: 8px; }
+
+    footer{background:var(--header-color);color:var(--primary-background);text-align:center;padding:3rem 0; margin-top: 5rem;}
+
+    .mobile-nav-toggle { display: none; }
+    @media (max-width: 768px) {
+      .spine-line { left: 20px; }
+      .research-capsule, .research-capsule:nth-child(even), .research-capsule:nth-child(odd) { width: 85%; left: 10%; }
+      .research-capsule::after { width: 10px; left: -1.5rem; }
+      .nav-links { position: fixed; z-index: 1500; inset: 0 0 0 30%; flex-direction: column; padding: min(20vh, 10rem) 2rem; gap: 2rem; background: rgba(26, 32, 44, 0.95); backdrop-filter: blur(10px); transform: translateX(100%); transition: transform 350ms ease-out; }
+      .nav-links[data-visible="true"] { transform: translateX(0%); }
+      .mobile-nav-toggle { display: block; position: absolute; top: 2rem; right: 2rem; z-index: 2000; border: none; background: transparent; cursor: pointer; }
+      .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+      .hamburger-box { display: inline-block; position: relative; width: 30px; height: 24px; }
+      .hamburger-inner, .hamburger-inner::before, .hamburger-inner::after { position: absolute; width: 30px; height: 3px; background-color: var(--header-color); border-radius: 3px; transition: transform 0.22s cubic-bezier(0.55, 0.055, 0.675, 0.19); }
+      .hamburger-inner { top: 50%; transform: translateY(-50%); }
+      .mobile-nav-toggle[aria-expanded="true"] .hamburger-inner { transform: rotate(225deg); transition-delay: 0.12s; transition-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1); }
+      .hamburger-inner::before, .hamburger-inner::after { content: ''; display: block; }
+      .hamburger-inner::before { top: -10px; }
+      .hamburger-inner::after { bottom: -10px; }
+      .mobile-nav-toggle[aria-expanded="true"] .hamburger-inner::before { top: 0; transform: rotate(-90deg); opacity: 0; }
+      .mobile-nav-toggle[aria-expanded="true"] .hamburger-inner::after { bottom: 0; transform: rotate(-90deg); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="logo">TR<span class="logo-i">(i)</span>P Lab</div>
+      <button class="mobile-nav-toggle" aria-controls="nav-links" aria-expanded="false">
+        <span class="sr-only">Menu</span>
+        <span class="hamburger-box">
+          <span class="hamburger-inner"></span>
+        </span>
+      </button>
+      <ul class="nav-links" id="nav-links" data-visible="false">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="research.html">Research</a></li>
+        <li><a href="team.html">Team</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div class="container">
+      <h1 class="page-title">Our Research</h1>
+      <p class="page-subtitle">We focus on providing molecular proofs for the health benefits of different food and food constituents, blending ancient wisdom with modern science.</p>
+
+      <div class="metabolic-spine">
+        <div class="spine-line"></div>
+        <div class="research-capsule">
+            <h2>Capsaicin & The Gut Microbiome</h2>
+            <p>It is noteworthy that we have been first laboratory to report increase in Akkermansia muciniphila on capsaicin administration and its possible role in its anti-obesity effect. This groundbreaking work links a common dietary component to significant metabolic health outcomes through its interaction with the gut microbiome.</p>
+            <div class="research-media">
+              <img src="https://placehold.co/600x400/2D3748/A0AEC0?text=Infographic+or+Image" alt="Placeholder for Capsaicin research infographic">
+            </div>
+            <a href="#" class="publication-link">Related Publication &rarr;</a>
+        </div>
+        <div class="research-capsule">
+            <h2>Metabolic Health & Prebiotics</h2>
+            <p>While many artificial sweeteners can cause metabolic complications through gut dysbiosis, our lab has established that sweet prebiotics like isomaltooligosaccharides (IMO) have profound gut benefits. We found they improve metabolic health by increasing good bacterial abundance and the production of short chain fatty acids, making them a viable alternative for developing novel healthy foods.</p>
+            <div class="research-media">
+              <video controls poster="https://placehold.co/600x400/2D3748/A0AEC0?text=Video+Poster" style="width:100%"><source src="#" type="video/mp4"></video>
+            </div>
+            <a href="#" class="publication-link">Related Publication &rarr;</a>
+        </div>
+        <div class="research-capsule">
+            <h2>TRP Channels & Sensory Compounds</h2>
+            <p>Our research delves into how cooling compounds like menthol interact with TRP (Transient Receptor Potential) channels to produce their signature sensory effects. Understanding these molecular interactions is key to developing new therapeutic agents for pain and inflammation.</p>
+            <div class="research-media">
+              <img src="https://placehold.co/600x400/2D3748/A0AEC0?text=Infographic+or+Image" alt="Placeholder for Menthol research infographic">
+            </div>
+            <a href="#" class="publication-link">Related Publication &rarr;</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer id="contact"><div class="container"><p>&copy; 2025 TR(i)P Lab</p></div></footer>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const $ = s => document.querySelector(s);
+    const navToggle = $(".mobile-nav-toggle");
+    const navLinks = $(".nav-links");
+
+    navToggle.addEventListener('click', () => {
+      const isVisible = navLinks.getAttribute('data-visible') === 'true';
+      navToggle.setAttribute('aria-expanded', !isVisible);
+      navLinks.setAttribute('data-visible', !isVisible);
+    });
+
+    const capsules = document.querySelectorAll('.research-capsule');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+    capsules.forEach(capsule => {
+        observer.observe(capsule);
+    });
+  });
+  </script>
+</body>
+</html>

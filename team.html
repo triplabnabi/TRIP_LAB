@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TR(i)P Lab | Our Team</title>
+
+  <link rel="stylesheet" href="https://molstar.org/viewer/molstar.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --primary-background:#1A202C; --content-background:#2D3748;
+      --main-text-color:#A0AEC0; --header-color:#FFFFFF;
+      --accent-color:#F6E05E; --subtle-border:#4A5568;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;line-height:1.8;color:var(--main-text-color);background:var(--primary-background);}
+
+    #p5-header-canvas{position:fixed;top:0;left:0;width:100%;height:140px;z-index:1;opacity:0.6;pointer-events:none}
+    header{position:fixed;top:0;left:0;right:0;z-index:1000;padding:1.5rem 0}
+    nav{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:0 2rem}
+    .logo{font-size:1.5rem;font-weight:700;color:var(--header-color);background:rgba(45,55,72,0.7);backdrop-filter:blur(10px);padding:.5rem 1.5rem;border-radius:8px;box-shadow:0 5px 15px rgba(0,0,0,.2)}
+    .logo .logo-i{color:var(--accent-color);font-style:italic}
+    .nav-links{display:flex;gap:1rem;list-style:none}
+    .nav-links a{text-decoration:none;color:var(--header-color);font-weight:600;padding:.5rem 1rem;border-radius:8px;background:rgba(45,55,72,0.7);backdrop-filter:blur(10px);box-shadow:0 5px 15px rgba(0,0,0,.2);transition:all .3s}
+    .nav-links a:hover{background:var(--content-background);color:var(--accent-color);transform:translateY(-3px)}
+
+    main{position:relative;z-index:2; margin-top: 140px;}
+    .container{max-width:1100px;margin:0 auto;padding:0 2rem}
+    section{padding:5rem 0}
+
+    .page-title{text-align:center;font-size:3.5rem;font-weight:600;color:var(--header-color);margin-bottom:1rem}
+    .page-subtitle{text-align:center;font-size:1.2rem;max-width:600px;margin:0 auto 4rem;}
+
+    .team{background:var(--content-background);}
+    .team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem}
+    .team-card{background:#4A5568;border-radius:12px;padding:2rem;text-align:center;border:1px solid var(--subtle-border);transition:all .3s;}
+    .team-card:hover{transform:translateY(-10px);box-shadow:0 20px 40px rgba(0,0,0,.3)}
+    .pi-card{grid-column:1/-1;display:grid;grid-template-columns:250px 1fr;gap:3rem;align-items:center;padding:3rem;text-align:left;background:var(--primary-background);}
+    .pi-photo{width:250px;height:250px;border-radius:50%;object-fit:cover}
+    .pi-bio h2{color:var(--header-color);margin-bottom:.5rem}
+    .pi-bio .pi-role{color:var(--accent-color);font-weight:700;font-size:1.2rem;margin-bottom:1rem}
+
+    .team-photo{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--accent-color),#F6AD5E);margin:0 auto 1.5rem;display:flex;align-items:center;justify-content:center;color:#1A202C;font-size:2.5rem;font-weight:bold;object-fit:cover;}
+    .team-card h3{color:var(--header-color);margin-bottom:.25rem;font-size:1.25rem;}
+    .team-card .role{font-size:1rem;color:var(--accent-color);margin-bottom:1rem;font-weight:500;}
+    .team-card p{font-size:0.9rem;}
+
+    footer{background:var(--header-color);color:var(--primary-background);text-align:center;padding:3rem 0}
+
+    .mobile-nav-toggle { display: none; }
+    @media (max-width: 768px) {
+      .pi-card { grid-template-columns: 1fr; text-align: center; }
+      .pi-photo { margin: 0 auto; }
+      .nav-links { position: fixed; z-index: 1500; inset: 0 0 0 30%; flex-direction: column; padding: min(20vh, 10rem) 2rem; gap: 2rem; background: rgba(26, 32, 44, 0.95); backdrop-filter: blur(10px); transform: translateX(100%); transition: transform 350ms ease-out; }
+      .nav-links[data-visible="true"] { transform: translateX(0%); }
+      .mobile-nav-toggle { display: block; position: absolute; top: 2rem; right: 2rem; z-index: 2000; border: none; background: transparent; cursor: pointer; }
+      .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+      .hamburger-box { display: inline-block; position: relative; width: 30px; height: 24px; }
+      .hamburger-inner, .hamburger-inner::before, .hamburger-inner::after { position: absolute; width: 30px; height: 3px; background-color: var(--header-color); border-radius: 3px; transition: transform 0.22s cubic-bezier(0.55, 0.055, 0.675, 0.19); }
+      .hamburger-inner { top: 50%; transform: translateY(-50%); }
+      .mobile-nav-toggle[aria-expanded="true"] .hamburger-inner { transform: rotate(225deg); transition-delay: 0.12s; transition-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1); }
+      .hamburger-inner::before, .hamburger-inner::after { content: ''; display: block; }
+      .hamburger-inner::before { top: -10px; }
+      .hamburger-inner::after { bottom: -10px; }
+      .mobile-nav-toggle[aria-expanded="true"] .hamburger-inner::before { top: 0; transform: rotate(-90deg); opacity: 0; }
+      .mobile-nav-toggle[aria-expanded="true"] .hamburger-inner::after { bottom: 0; transform: rotate(-90deg); }
+    }
+  </style>
+</head>
+<body>
+  <div id="p5-header-canvas"></div>
+
+  <header>
+    <nav>
+      <div class="logo">TR(i)P Lab</div>
+      <button class="mobile-nav-toggle" aria-controls="nav-links" aria-expanded="false">
+        <span class="sr-only">Menu</span>
+        <span class="hamburger-box">
+          <span class="hamburger-inner"></span>
+        </span>
+      </button>
+      <ul class="nav-links" id="nav-links" data-visible="false">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="research.html">Research</a></li>
+        <li><a href="team.html">Team</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="team" class="team">
+      <div class="container">
+        <h1 class="page-title">Our Team</h1>
+        <p class="page-subtitle">Our lab is composed of a diverse and dedicated group of scientists passionate about pioneering the future of nutritional science.</p>
+        
+        <div class="team-grid">
+          <div class="team-card pi-card">
+            <img class="pi-photo" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=500&q=80" alt="Dr. Mahendra Bishnoi">
+            <div class="pi-bio">
+              <h2>Dr. Mahendra Bishnoi</h2>
+              <div class="pi-role">Scientist F | Diet/Nutrition & Receptor Pharmacology</div>
+              <p>Dr. Bishnoi leads the lab with a focus on providing rigorous scientific mechanisms to ancient beliefs about the health benefits of dietary constituents. His research utilizes nutrigenomics and receptor-based approaches to promote 'food as medicine' and address global nutritional challenges. Before joining in 2011, he completed postdoctoral fellowships in pain and diabetes research at Southern Illinois University and in nicotine addiction at the University of Florida's McKnight Brain Institute.</p>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="page-title" style="font-size:2.5rem;margin-top:4rem;margin-bottom:2rem;">Lab Members & Researchers</h2>
+        <div class="team-grid">
+          <div class="team-card"><img class="team-photo" src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=500&q=80" alt="Team Member"><h3>Dr. Anna Rodriguez</h3><div class="role">Postdoctoral Fellow</div><p>Anna is a computational biologist developing molecular dynamics simulations.</p></div>
+          <div class="team-card"><img class="team-photo" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=500&q=80" alt="Team Member"><h3>Michael Kim</h3><div class="role">PhD Student</div><p>Michael is investigating TRPM8 pharmacology.</p></div>
+          <div class="team-card"><img class="team-photo" src="https://images.unsplash.com/photo-1552058544-f2b08422138a?w=500&q=80" alt="Team Member"><h3>Dr. James Liu</h3><div class="role">Senior Research Scientist</div><p>James is an electrophysiologist expert in patch-clamp techniques.</p></div>
+          <div class="team-card"><div class="team-photo">SP</div><h3>S. Priya</h3><div class="role">Research Associate</div><p>Placeholder bio for team member.</p></div>
+          <div class="team-card"><div class="team-photo">RK</div><h3>R. Kumar</h3><div class="role">Lab Technician</div><p>Placeholder bio for team member.</p></div>
+          <div class="team-card"><div class="team-photo">AD</div><h3>A. Das</h3><div class="role">PhD Student</div><p>Placeholder bio for team member.</p></div>
+          <div class="team-card"><div class="team-photo">MJ</div><h3>M. Jones</h3><div class="role">Postdoctoral Fellow</div><p>Placeholder bio for team member.</p></div>
+          <div class="team-card"><div class="team-photo">CY</div><h3>C. Yang</h3><div class="role">Research Intern</div><p>Placeholder bio for team member.</p></div>
+          <div class="team-card"><div class="team-photo">LG</div><h3>L. Gupta</h3><div class="role">Lab Manager</div><p>Placeholder bio for team member.</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="contact"><div class="container"><p>&copy; 2025 TR(i)P Lab</p></div></footer>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const $ = s => document.querySelector(s);
+    const navToggle = $(".mobile-nav-toggle");
+    const navLinks = $(".nav-links");
+
+    navToggle.addEventListener('click', () => {
+      const isVisible = navLinks.getAttribute('data-visible') === 'true';
+      navToggle.setAttribute('aria-expanded', !isVisible);
+      navLinks.setAttribute('data-visible', !isVisible);
+    });
+  });
+  </script>
+</body>
+</html>

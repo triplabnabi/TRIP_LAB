@@ -1,0 +1,23 @@
+
+# Ignore large data and result files
+*.pdf
+*.tsv
+*.pkl
+*.gz
+*.jpg
+
+# Ignore directories
+/checkpoints/
+/decoy_plots/
+/generic_residue_plots/
+/glass_peptide_results/
+/GPCR_peptide_benchmarking-main/
+/magic-mcp/
+/my-chakra-app/
+/PDB-MCP-Server/
+/pepbdb_scripts/
+/venv/
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db

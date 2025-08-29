@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TR(i)P Lab | The Grand Synthesis Edition</title>
+
+  <link rel="stylesheet" href="https://molstar.org/viewer/molstar.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+  <style>
+/* --- NEW "Verdant & Clear Sky" PALETTE --- */
+:root {
+  --primary-background: #F5EFE6;
+  --main-text-color:    #394A48;
+  --header-color:       #2C5D63; /* Forest Green */
+  --accent-color:       #B0E0E6; /* The new, airy "Powder Blue" */
+  --accent-darker:      #8cb8bf; /* A darker shade for hovers */
+  --subtle-border:      #E0DACE;
+  --hover-shadow:       rgba(176, 224, 230, 0.25); /* Shadow now matches the new accent */
+  --soft-shadow:        rgba(44, 93, 99, 0.1);
+}
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;line-height:1.8;color:var(--main-text-color);background:var(--primary-background);}
+
+    #cursor-light {
+      position: fixed;
+      top: -300px;
+      left: -300px;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      /* This is the magic: a dark, transparent, cool blue gradient */
+      background: radial-gradient(circle, rgba(21, 104, 122, 0.15) 0%, rgba(21, 104, 122, 0) 50%);
+      pointer-events: none;
+      z-index: 0; /* Position it behind the glassmorphic content */
+      mix-blend-mode: multiply; /* This blend mode creates a beautiful, rich darkening effect */
+    }
+
+    #p5-header-canvas{position:fixed;top:0;left:0;width:100%;height:100vh;z-index:-1;pointer-events:none}
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1.5rem 0;
+  background: linear-gradient(120deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.12) 100%);
+  backdrop-filter: blur(28px) saturate(1.3);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+  border-bottom: 1.5px solid rgba(255,255,255,0.25);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* The sharp edge */
+    }
+    nav{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:0 2rem}
+    .logo-container {
+      position: relative;
+      cursor: pointer;
+    }
+    /* Use Inter variable font for smooth weight transitions */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+    /* --- CSS Update for Ghibli Sparkle --- */
+    .logo {
+      position: relative;
+      overflow: hidden; /* Ensures sparkles don't appear outside the logo */
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 2rem;
+      color: var(--header-color);
+      background: linear-gradient(120deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.18) 100%);
+      backdrop-filter: blur(24px) saturate(1.3);
+      padding: .7rem 2rem;
+      border-radius: 12px;
+      border: 1.5px solid rgba(255,255,255,0.32);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+      transition: transform 0.3s, box-shadow 0.3s;
+      text-shadow: none;
+    }
+    .logo:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px var(--hover-shadow);
+    }
+    .logo .logo-i {
+      color: var(--accent-darker);
+      font-style: italic;
+      font-weight: 900;
+    }
+
+    .sparkle {
+      position: absolute;
+      background-color: var(--accent-color);
+      border-radius: 50%;
+      width: 4px;
+      height: 4px;
+      pointer-events: none;
+      opacity: 0;
+    }
+    .lab-subtitle {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 100%;
+      font-size: 0.85rem;
+      color: var(--header-color);
+      font-weight: 600;
+      opacity: 0;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      padding-top: 0.5rem;
+      text-align: center;
+      width: max-content;
+      text-shadow: 0 1px 3px rgba(255,255,255,0.8);
+    }
+    .logo-container:hover .lab-subtitle {
+      opacity: 1;
+      transform: translateX(-50%) translateY(5px);
+    }
+    .nav-links{display:flex;gap:1.5rem;list-style:none}
+    .nav-links a{
+      text-decoration:none;
+      color:var(--header-color);
+      font-weight:600;
+      font-size: 1.1rem;
+      padding:.7rem 2rem;
+      border-radius:12px;
+  background: linear-gradient(120deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.12) 100%);
+  backdrop-filter: blur(22px) saturate(1.2);
+  box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.10);
+  border: 1.2px solid rgba(255,255,255,0.22);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition:all .3s ease;
+      text-shadow: none;
+    }
+    .nav-links a:hover{
+      background:rgba(0,191,255,0.05);
+      color:var(--accent-darker);
+      transform:translateY(-2px);
+      box-shadow:0 8px 30px var(--hover-shadow);
+      border-color:rgba(0,191,255,0.2);
+    }
+
+    main{position:relative;z-index:2}
+    .content-wrapper{background:transparent;margin-top:30vh} 
+    .container{max-width:1100px;margin:0 auto;padding:0 2rem}
+    section{padding:5rem 0}
+
+    .hero{text-align:center;padding:6rem 0;min-height:70vh;display:flex;justify-content:center;align-items:center}
+    .hero h1{font-size:3.8rem;font-weight:600;color:var(--header-color);margin-bottom:1.5rem}
+    .hero h1 .char{display:inline-block;opacity:0}
+    .hero p{font-size:1.25rem;margin-bottom:2rem;max-width:700px;margin-left:auto;margin-right:auto;opacity:0}
+    .cta-button {
+  position: relative;
+  color: white;
+  padding: 1.2rem 3rem;
+  border: none;
+  border-radius: 16px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  opacity: 0;
+  box-shadow: 0 12px 40px var(--hover-shadow), 0 0 0 4px rgba(85,240,255,0.18);
+  transition: all 0.3s cubic-bezier(.5,1.5,.5,1), box-shadow 0.3s, transform 0.3s;
+  background: linear-gradient(120deg, #2B3A67 0%, #85F0FF 40%, #E07BE0 70%, #F6E05E 100%);
+  backdrop-filter: blur(38px) saturate(1.7);
+  border: 2.5px solid rgba(85,240,255,0.32);
+  overflow: hidden;
+  /* Rothko-style blurred color blocks */
+  /* Fractal/protein overlay will be added via ::after */
+    }
+    .cta-button::before {
+  content: "";
+  position: absolute;
+  top: -30%; left: -30%;
+  width: 160%; height: 160%;
+  background: linear-gradient(120deg, #2B3A67 0%, #85F0FF 40%, #E07BE0 70%, #F6E05E 100%);
+  opacity: 0.38;
+  filter: blur(32px);
+  z-index: 0;
+  pointer-events: none;
+  animation: auroraSweep 4s linear infinite;
+    /* Fractal/protein overlay for button */
+    .cta-button::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        url('data:image/svg+xml;utf8,<svg width="320" height="80" viewBox="0 0 320 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10,40 Q60,10 110,40 T210,40 T310,40" stroke="%2385F0FF" stroke-width="3" fill="none" opacity="0.7"/><circle cx="60" cy="10" r="6" fill="%23E07BE0" opacity="0.5"/><circle cx="110" cy="40" r="5" fill="%23F6E05E" opacity="0.5"/><circle cx="210" cy="40" r="7" fill="%2385F0FF" opacity="0.5"/></svg>') center/cover no-repeat;
+      mix-blend-mode: lighten;
+      opacity: 0.7;
+      animation: fractalMove 6s linear infinite;
+    }
+    @keyframes fractalMove {
+      0% { filter: blur(0px); opacity: 0.7; }
+      50% { filter: blur(2px); opacity: 1; }
+      100% { filter: blur(0px); opacity: 0.7; }
+    }
+    }
+    @keyframes auroraSweep {
+      0% { transform: rotate(0deg) scale(1); }
+      100% { transform: rotate(360deg) scale(1.1); }
+    }
+    .cta-button:hover {
+  transform: scale(1.12) translateY(-4px);
+  box-shadow: 0 24px 60px var(--hover-shadow), 0 0 0 6px rgba(85,240,255,0.22);
+  filter: brightness(1.18) saturate(1.5);
+    }
+    .cta-button span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-title{text-align:center;font-size:2.8rem;font-weight:600;color:var(--header-color);margin-bottom:3rem}
+
+    /* --- PROTECTIVE OVERRIDE for the Research Section Title --- */
+    .research-grid .section-title-reveal {
+      color: #2D3748 !important; /* This forces it to keep the original dark blue */
+    }
+
+    .research-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
+
+    .protein-container{
+      border-radius:16px;
+      overflow:hidden;
+      position:relative;
+      height:550px;
+      background:var(--content-background);
+      box-shadow:0 10px 40px var(--soft-shadow);
+      border:1px solid var(--subtle-border);
+    }
+    #molstar-viewer{width:100%;height:100%;position:relative;background:transparent}
+
+    .team{background:var(--content-background)}
+    .team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem}
+    .team-card{
+      background:var(--content-background);
+      border-radius:12px;
+      padding:2rem;
+      text-align:center;
+      border:1px solid var(--subtle-border);
+      cursor:pointer;
+      transition:all .3s ease;
+      box-shadow:0 5px 20px var(--soft-shadow);
+    }
+    .team-card:hover{
+      transform:translateY(-10px);
+      box-shadow:0 20px 40px var(--hover-shadow);
+      border-color:rgba(0,191,255,0.2);
+    }
+    .pi-card{
+      grid-column:1/-1;
+      display:grid;
+      grid-template-columns:250px 1fr;
+      gap:3rem;
+      align-items:center;
+      padding:3rem;
+      text-align:left;
+      box-shadow:0 8px 30px var(--soft-shadow);
+    }
+    .pi-photo{width:250px;height:250px;border-radius:50%;object-fit:cover;border:3px solid var(--subtle-border)}
+    .pi-bio h2{color:var(--header-color);margin-bottom:.5rem}
+    .pi-bio .pi-role{color:var(--accent-darker);font-weight:700;font-size:1.2rem;margin-bottom:1rem}
+
+    .team-photo{
+      width:100px;
+      height:100px;
+      border-radius:50%;
+      background:linear-gradient(135deg, var(--accent-color), var(--accent-darker));
+      margin:0 auto 1.5rem;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:white;
+      font-size:2rem;
+      font-weight:bold;
+      box-shadow:0 8px 20px var(--hover-shadow);
+    }
+    .team-card h3{color:var(--header-color);margin-bottom:.5rem}
+
+    /* vertical timeline */
+    .scrolly-story{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:flex-start;padding:10vh 0}
+    .story-text{position:relative;z-index:2;padding:0 1rem}
+    .story-step{min-height:80vh;display:flex;flex-direction:column;justify-content:center;}
+    .story-step h3{font-size:2.5rem;color:var(--header-color);margin-bottom:1rem;font-weight:600}
+    .story-step p{font-size:1.1rem;max-width:450px}
+    .story-timeline {
+      position: sticky;
+      top: 50vh;
+      transform: translateY(-50%);
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+  min-height: 420px;
+  height: 420px;
+    }
+    .timeline-line {
+  position: relative;
+  width: 12px;
+  height: 420px;
+  min-height: 420px;
+  background: var(--subtle-border);
+  border-radius: 8px;
+  margin: 0 auto;
+  box-shadow: 0 2px 12px var(--soft-shadow);
+    }
+    .timeline-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 0%;
+      background: linear-gradient(to bottom, var(--accent-color), var(--accent-darker));
+      border-radius: 8px;
+      z-index: 2;
+      box-shadow: 0 2px 12px var(--hover-shadow);
+    }
+    .timeline-node {
+      position: absolute;
+      left: 50%;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #CBD5E0;
+      border: 4px solid var(--content-background);
+      box-shadow: 0 4px 16px var(--soft-shadow);
+      transform: translate(-50%, -50%);
+      transition: all .3s cubic-bezier(.5,1.5,.5,1);
+      z-index: 3;
+    }
+    .timeline-node.is-active {
+      background: var(--accent-color);
+      border-color: white;
+      transform: translate(-50%, -50%) scale(1.18);
+      box-shadow: 0 8px 24px var(--hover-shadow);
+    }
+  .timeline-node[data-step="0"] { top: 42px; }
+  .timeline-node[data-step="1"] { top: 210px; }
+  .timeline-node[data-step="2"] { top: 378px; }
+
+    #modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);backdrop-filter:blur(5px);z-index:2000;opacity:0;pointer-events:none;display:none}
+    #modal{
+      position:fixed;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%);
+      width:90%;
+      max-width:700px;
+  background: linear-gradient(120deg, rgba(45,55,72,0.38) 0%, rgba(255,255,255,0.18) 100%);
+  backdrop-filter: blur(36px) saturate(1.3);
+  box-shadow: 0 12px 48px 0 rgba(31, 38, 135, 0.22);
+  border: 2px solid rgba(255,255,255,0.32);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4); /* Deeper shadow for floating effect */
+      border-radius:16px;
+      padding:3rem;
+      max-height:80vh;
+      overflow-y:auto;
+      opacity:0;
+      pointer-events:none;
+    }
+    #modal-close{position:absolute;top:15px;right:20px;font-size:2rem;cursor:pointer;color:var(--header-color);transition:color 0.3s ease}
+    #modal-close:hover{color:var(--accent-color)}
+    #modal-content{display:flex;flex-direction:column;align-items:center;text-align:center}
+    #modal-photo{width:150px;height:150px;border-radius:50%;object-fit:cover;flex-shrink:0;margin-bottom:1.5rem;border:3px solid var(--subtle-border)}
+    #modal-bio h2{color:var(--header-color)}
+    #modal-bio .role{color:var(--accent-darker);font-weight:700;font-size:1.1rem;margin-bottom:1rem}
+    #modal-bio p{text-align:left}
+    #modal-awards{margin-top:1.5rem;width:100%;text-align:left}
+    #modal-awards h3{font-size:1.1rem;color:var(--header-color);border-bottom:2px solid var(--subtle-border);padding-bottom:.5rem}
+    #modal-awards ul{list-style:none;padding:0;margin-top:1rem}
+    #modal-awards li{margin-bottom:.5rem;padding-left:1.5rem;position:relative}
+    #modal-awards li::before{content:'★';position:absolute;left:0;color:var(--accent-color)}
+
+    .publications{background:var(--primary-background); border-bottom: 1px solid var(--subtle-border);}
+    .pub-list{max-width:900px;margin:0 auto}
+    .pub-item{
+      background:var(--content-background);
+      padding:2rem;
+      margin-bottom:1.5rem;
+      border-radius:12px;
+      border-left:4px solid var(--accent-color);
+      transition: all 0.3s ease-in-out;
+      box-shadow:0 5px 20px var(--soft-shadow);
+      border-top:1px solid var(--subtle-border);
+      border-right:1px solid var(--subtle-border);
+      border-bottom:1px solid var(--subtle-border);
+    }
+    .pub-item:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px var(--hover-shadow);
+    }
+    .pub-item h3{color:var(--header-color);margin-bottom:.5rem;font-size:1.2rem}
+    .pub-item a{color:var(--accent-darker);text-decoration:none;font-weight:600;transition:color 0.3s ease}
+    .pub-item a:hover{color:var(--accent-color);text-decoration:underline}
+
+    .firefly{
+      position:fixed;
+      border-radius:50%;
+      pointer-events:none;
+      opacity:.4;
+      box-shadow:0 0 12px rgba(0,191,255,0.6);
+      filter:blur(.8px);
+      animation:fireGlow linear infinite;
+    }
+    @keyframes fireGlow{
+      0%,100%{transform:translateY(0) scale(1);opacity:.2}
+      50%{transform:translateY(-6px) scale(1.2);opacity:.6}
+    }
+
+    /* ...existing code... */
+    @keyframes fireGlow {
+      0%,100% { transform: translateY(0) scale(1); opacity: .2; }
+      50% { transform: translateY(-6px) scale(1.2); opacity: .6; }
+    }
+
+    footer {
+      background: var(--content-background);
+      border-top: 1px solid var(--subtle-border);
+      padding: 4rem 0 2rem;
+      position: relative;
+    }
+    .footer-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 3rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+    .footer-section h3 {
+      color: var(--header-color);
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+    .footer-section p {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+    .footer-links {
+      list-style: none;
+    }
+    .footer-links li {
+      margin-bottom: 0.8rem;
+    }
+    .footer-links a {
+      color: var(--main-text-color);
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    .footer-links a:hover {
+      color: var(--accent-darker);
+      padding-left: 5px;
+    }
+    .social-links {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .social-links a {
+      color: var(--main-text-color);
+      text-decoration: none;
+      padding: 8px;
+      border-radius: 50%;
+      border: 1px solid var(--subtle-border);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 35px;
+      height: 35px;
+    }
+    .social-links a:hover {
+      color: white;
+      background: var(--accent-color);
+      border-color: var(--accent-color);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px var(--hover-shadow);
+    }
+    .footer-bottom {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--subtle-border);
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .mobile-nav-toggle { display: none; }
+    @media (max-width: 768px) {
+      section { padding: 3rem 1rem; }
+      .hero h1 { font-size: 2.5rem; }
+      .section-title { font-size: 2rem; }
+      .research-grid, .scrolly-story, .pi-card { grid-template-columns: 1fr; }
+      .pi-card { text-align: center; }
+      .pi-photo { margin: 0 auto; }
+      .story-timeline { position: relative; top: auto; transform: none; padding: 4rem 0; margin: 0 auto; }
+      .story-step { min-height: auto; padding: 2rem 0; }
+      .nav-links { position: fixed; z-index: 1500; inset: 0 0 0 30%; flex-direction: column; padding: min(20vh, 10rem) 2rem; gap: 2rem; background: rgba(42,42,42,0.95); backdrop-filter: blur(10px); transform: translateX(100%); transition: transform 350ms ease-out; }
+      .nav-links[data-visible="true"] { transform: translateX(0%); }
+      .mobile-nav-toggle { display: block; position: absolute; top: 2rem; right: 2rem; z-index: 2000; border: none; background: transparent; cursor: pointer; }
+      .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+      .hamburger-box { display: inline-block; position: relative; width: 30px; height: 24px; }
+      .hamburger-inner, .hamburger-inner::before, .hamburger-inner::after { position: absolute; width: 30px; height: 3px; background-color: var(--header-color); border-radius: 3px; transition: transform 0.22s cubic-bezier(0.55, 0.055, 0.675, 0.19); }
+      .hamburger-inner { top: 50%; transform: translateY(-50%); }
+      .mobile-nav-toggle[aria-expanded="true"] .hamburger-inner { transform: rotate(225deg); transition-delay: 0.12s; transition-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1); }
+      .hamburger-inner::before, .hamburger-inner::after { content: ''; display: block; }
+      .hamburger-inner::before { top: -10px; }
+      .hamburger-inner::after { bottom: -10px; }
+      .mobile-nav-toggle[aria-expanded="true"] .hamburger-inner::before { top: 0; transform: rotate(-90deg); opacity: 0; }
+      .mobile-nav-toggle[aria-expanded="true"] .hamburger-inner::after { bottom: 0; transform: rotate(-90deg); }
+      .nav-links a { background: transparent; backdrop-filter: none; box-shadow: none; }
+      .footer-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        text-align: center;
+      }
+      .social-links {
+        justify-content: center;
+      }
+      .footer-links a:hover {
+        padding-left: 0;
+      }
+    }
+</style>
+</head>
+<body>
+  <div id="p5-header-canvas"></div>
+
+  <header>
+    <nav>
+      <div class="logo-container">
+        <div class="logo">TR<span class="logo-i">(i)</span>P Lab</div>
+        <div class="lab-subtitle">Translation Research on TRP Channels, Obesity and Metabolism Lab</div>
+      </div>
+      <button class="mobile-nav-toggle" aria-controls="nav-links" aria-expanded="false">
+        <span class="sr-only">Menu</span>
+        <span class="hamburger-box">
+          <span class="hamburger-inner"></span>
+        </span>
+      </button>
+      <ul class="nav-links" id="nav-links" data-visible="false">
+        <li><a href="#home" class="magnetic-link">Home</a></li>
+        <li><a href="#research" class="magnetic-link">Research</a></li>
+        <li><a href="#team" class="magnetic-link">Team</a></li>
+        <li><a href="#publications" class="magnetic-link">Publications</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="content-wrapper">
+    <main>
+      <section id="home" class="hero">
+        <div class="container">
+          <div>
+            <h1 class="hero-title">Promoting Food as Medicine</h1>
+            <p class="hero-subtitle">Our objective is to provide scientific mechanisms to ancient beliefs about the health benefits of dietary constituents.</p>
+            <a href="#research" class="cta-button magnetic-link">Explore Our Discoveries</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="research" class="research">
+        <div class="container">
+          <div class="research-grid">
+            <div class="research-content">
+              <h2 class="section-title section-title-reveal">Contribution to Scientific Advancement</h2>
+              <p>Our lab provides molecular proofs for the health benefits of food constituents like capsaicin, cinnamaldehyde, and menthol, blending ancient wisdom with modern science.</p>
+            </div>
+            <div class="protein-container">
+              <div id="molstar-viewer"></div>
+            </div>
+          </div>
+
+          <div class="scrolly-story">
+            <div class="story-text">
+              <div id="story-step-1" class="story-step"><h3>Capsaicin</h3><p>We were the first to report that capsaicin increases <em>Akkermansia muciniphila</em>, linking it to a powerful anti-obesity effect.</p></div>
+              <div id="story-step-2" class="story-step"><h3>Gut Microbiome</h3><p>We established that sweet prebiotics like IMO improve metabolic health by boosting good bacteria.</p></div>
+              <div id="story-step-3" class="story-step"><h3>Menthol</h3><p>Our research delves into how cooling compounds like menthol interact with TRP channels to produce their signature sensory effects.</p></div>
+            </div>
+
+            <div class="story-timeline">
+              <div class="timeline-line">
+                <div class="timeline-progress" id="timeline-progress"></div>
+                <div class="timeline-node" data-step="0" id="node-1"></div>
+                <div class="timeline-node" data-step="1" id="node-2"></div>
+                <div class="timeline-node" data-step="2" id="node-3"></div>
+              </div>
+            </div>
+          </div>
+          <div style="text-align:center; margin-top:3rem;"><a href="research.html" class="cta-button magnetic-link" style="opacity:1; transform:none;">Explore More Research</a></div>
+        </div>
+      </section>
+
+      <section id="team" class="team">
+        <div class="container">
+          <h2 class="section-title section-title-reveal">Meet the Team</h2>
+          <div class="team-grid">
+            <div class="team-card pi-card" data-member-id="pi">
+              <img class="pi-photo" src="dr_bishnoi_profile_zoomed_out.jpg" alt="Dr. Mahendra Bishnoi">
+              <div class="pi-bio">
+                <h2>Dr. Mahendra Bishnoi</h2>
+                <div class="pi-role">Scientist F | Diet/Nutrition & Receptor Pharmacology</div>
+                <p>Click to learn more about Dr. Bishnoi's research, training, and achievements.</p>
+              </div>
+            </div>
+          </div>
+
+          
+          <div style="text-align:center; margin-top:3rem;"><a href="team.html" class="cta-button magnetic-link" style="opacity:1; transform:none;">Meet The Entire Team</a></div>
+        </div>
+      </section>
+
+      <section id="publications" class="publications">
+        <div class="container">
+          <h2 class="section-title section-title-reveal">Key Publications</h2>
+          <div class="pub-list">
+            <div class="pub-item">
+              <h3>Isolation, characterization and anti-inflammatory mechanism of probiotics...</h3>
+              <div class="authors">Khanna S, Bishnoi M, et al. (2020) <em>World J Microbiol Biotechnol.</em></div>
+              <a href="https://doi.org/10.1007/s11274-020-02852-z" target="_blank">Read Publication</a>
+            </div>
+            <div class="pub-item">
+              <h3>Anthocyanin-biofortified Colored Wheat Prevents High Fat Diet-induced Alterations...</h3>
+              <div class="authors">Sharma S, Khare P, et al. (2020) <em>Mol Nutr Food Res.</em></div>
+              <a href="https://doi.org/10.1002/mnfr.201900999" target="_blank">Read Publication</a>
+            </div>
+            <div class="pub-item">
+              <h3>Pharmacological inhibition of TRPM2 Channels Attenuates Diabetes-induced Cognitive Deficits...</h3>
+              <div class="authors">Thapak P, Bishnoi M, Sharma SS. (2020) <em>Curr Neurovasc Res.</em></div>
+              <a href="https://doi.org/10.2174/1567202617666200415142211" target="_blank">Read Publication</a>
+            </div>
+          </div>
+          <div style="text-align:center;margin-top:2rem;"><a href="#" class="cta-button magnetic-link">View All Publications</a></div>
+        </div>
+      </section>
+    </main>
+
+    <footer id="contact">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>TR(i)P Lab</h3>
+          <p>Advancing the understanding of dietary constituents through rigorous scientific research and molecular mechanisms.</p>
+          <div class="social-links">
+            <a href="#" title="Twitter" data-aos="fade-up" data-aos-delay="100"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a>
+            <a href="#" title="LinkedIn" data-aos="fade-up" data-aos-delay="200"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
+            <a href="#" title="Research Gate" data-aos="fade-up" data-aos-delay="300"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M19.586 0c-.818 0-1.508.19-2.073.565-.563.377-.97.936-1.213 1.68a3.193 3.193 0 0 0-.112.437 8.365 8.365 0 0 0-.078.53 9 9 0 0 0-.05.727c-.01.282-.013.621-.013 1.016a31.121 31.121 0 0 0 .014 1.017 9 9 0 0 0 .05.727h-7.658v1.949h3.782c-.717 1.308-1.78 2.627-3.772 2.627-3.622 0-3.622-4.012-3.622-5.273 0-2.688.86-5.273 3.622-5.273 2.073 0 3.097 1.415 3.774 1.415.76 0 1.342-.883 1.342-1.384 0-.384-.192-.752-.57-1.123-.477-.469-1.308-.884-2.33-1.091-.931-.188-1.973-.188-2.492-.188-4.886 0-7.327 3.809-7.327 7.66 0 4.5 3.214 7.66 7.326 7.66 4.012 0 6.614-3.194 6.614-7.66 0-.212-.01-.421-.023-.627a7.127 7.127 0 0 0-.092-.656 5.356 5.356 0 0 0-.168-.656 2.405 2.405 0 0 0-.129-.336c.28-.344.54-.344.793-.344.818 0 1.457.662 1.457 2.086v7.943h1.925v-7.943c0-.904-.258-1.689-.683-2.277a1.578 1.578 0 0 0-.168-.206 2.488 2.488 0 0 0-.244-.23 3.731 3.731 0 0 0-.48-.332c.48-.375.904-.564 1.258-.564 1.118 0 2.027.985 2.027 2.204v9.348h1.925v-9.348c0-.898-.258-1.681-.683-2.269a2.488 2.488 0 0 0-.168-.206 2.488 2.488 0 0 0-.244-.23 4.886 4.886 0 0 0-1.457-.77 6.615 6.615 0 0 0-2.108-.333z"></path></svg></a>
+          </div>
+        </div>
+        <div class="footer-section">
+          <h3>Quick Links</h3>
+          <ul class="footer-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#research">Research</a></li>
+            <li><a href="#team">Team</a></li>
+            <li><a href="#publications">Publications</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Research Areas</h3>
+          <ul class="footer-links">
+            <li><a href="#research">TRP Channels</a></li>
+            <li><a href="#research">Obesity Research</a></li>
+            <li><a href="#research">Metabolism</a></li>
+            <li><a href="#research">Nutrition Science</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Contact</h3>
+          <ul class="footer-links">
+            <li>NIPER-Guwahati</li>
+            <li>Mirza, Assam</li>
+            <li>Email: contact@triplab.org</li>
+            <li>Phone: +91 XXX XXX XXXX</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 TR(i)P Lab | All Rights Reserved</p>
+      </div>
+    </footer>
+  </div>
+
+  <div id="modal-overlay">
+    <div id="modal">
+      <div id="modal-close" tabindex="0">&times;</div>
+      <div id="modal-content">
+        <img id="modal-photo" src="" alt="Member photo">
+        <div id="modal-bio">
+          <h2 id="modal-name"></h2>
+          <div id="modal-role" class="role"></div>
+          <p id="modal-desc"></p>
+          <div id="modal-awards"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mol* core -->
+  <script type="text/javascript" src="https://molstar.org/viewer/molstar.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Small helpers
+      const $ = s => document.querySelector(s);
+      const $$ = s => Array.from(document.querySelectorAll(s));
+      const safe = fn => { try { return fn(); } catch (e) { console.warn(e); } };
+
+      const pdbMapping = {
+        'story-step-1': '5IS0',
+        'story-step-2': '6BPQ',
+        'story-step-3': '6NR2'
+      };
+
+      // Team data (unchanged)
+      window.teamData = window.teamData || {};
+
+      // --- REFINED P5.JS HEADER (BRIGHTER & BOLDER) ---
+      safe(() => {
+        if (!window.p5) { console.warn('p5 not loaded'); return; }
+        new p5(p => {
+          let neurons = [];
+          const NUM = 24;
+          let auroraTime = 0;
+          let trails = [];
+          p.setup = () => {
+            const c = p.createCanvas(p.windowWidth, p.windowHeight).parent('p5-header-canvas');
+            c.style('display', 'block');
+            for (let i = 0; i < NUM; i++) {
+              neurons.push({
+                pos: p.createVector(p.random(p.width), p.random(p.height)),
+                vel: p5.Vector.random2D().mult(p.random(0.1, 0.5)),
+                r: p.random(2, 6),
+                phase: p.random(p.TWO_PI)
+              });
+              trails.push([]);
+            }
+          };
+          p.draw = () => {
+            p.clear();
+            auroraTime += 0.01; // Slightly slower for a more majestic feel
+            p.push();
+            p.noFill();
+            // BOLDER AURORA ARCS
+            for (let i = 0; i < 5; i++) {
+              let cx = p.width * (0.5 + 0.4 * Math.sin(auroraTime * 0.7 + i * 1.7));
+              let cy = p.height * (0.5 + 0.3 * Math.cos(auroraTime * 1.0 + i * 1.3));
+              let baseR = p.width * (0.35 + 0.1 * Math.sin(auroraTime * 1.1 + i));
+              for (let j = 0; j < 3; j++) {
+                let r = baseR + j * 50;
+                let alpha = 200 - j * 40; // SIGNIFICANTLY INCREASED ALPHA
+                p.stroke(85, 240, 255, alpha);
+                p.strokeWeight(5 - j * 1.5); // THICKER STROKES
+                p.arc(cx, cy, r, r * 0.8, Math.PI * 0.1, Math.PI * 1.9);
+              }
+            }
+            p.pop();
+            // BRIGHTER NEURONS & TRAILS
+            neurons.forEach((n, idx) => {
+              n.pos.add(n.vel);
+              if (n.pos.x > p.width) n.pos.x = 0; if (n.pos.x < 0) n.pos.x = p.width;
+              if (n.pos.y > p.height) n.pos.y = 0; if (n.pos.y < 0) n.pos.y = p.height;
+
+              trails[idx].push(n.pos.copy()); if (trails[idx].length > 25) trails[idx].shift();
+              p.push();
+              for (let t = 0; t < trails[idx].length; t++) {
+                let trailAlpha = p.map(t, 0, trails[idx].length - 1, 0, 180); // INCREASED ALPHA
+                p.noStroke(); p.fill(85, 240, 255, trailAlpha);
+                let trailR = p.map(t, 0, trails[idx].length - 1, 1, n.r * 1.2);
+                p.ellipse(trails[idx][t].x, trails[idx][t].y, trailR);
+              }
+              p.pop();
+
+              const glow = (p.sin(p.frameCount * 0.05 + n.phase) + 1) * 127; // Max out the glow
+              p.noStroke(); p.fill(246, 224, 94, glow + 50); // Add base brightness
+              p.ellipse(n.pos.x, n.pos.y, n.r);
+            });
+          };
+          p.windowResized = () => p.resizeCanvas(p.windowWidth, p.windowHeight);
+        });
+      });
+
+      // Mobile nav toggle
+      safe(() => {
+        const navToggle = $('.mobile-nav-toggle');
+        const navLinks = $('.nav-links');
+        if (!navToggle || !navLinks) return;
+        navToggle.addEventListener('click', () => {
+          const isVisible = navLinks.getAttribute('data-visible') === 'true';
+          navToggle.setAttribute('aria-expanded', (!isVisible).toString());
+          navLinks.setAttribute('data-visible', (!isVisible).toString());
+        });
+      });
+
+      // cinematic reveals
+      safe(() => {
+        $$('.hero-title, .section-title-reveal').forEach(t => { t.innerHTML = t.textContent.replace(/\S/g, "<span class='char'>$&</span>"); });
+        if (window.anime) {
+          anime.timeline({ easing: 'easeOutExpo' })
+            .add({ targets: '.hero-title .char', translateY: [100, 0], opacity: [0, 1], delay: anime.stagger(30, { start: 300 }) })
+            .add({ targets: '.hero-subtitle, .cta-button', translateY: [40, 0], opacity: [0, 1], duration: 700 }, '-=700');
+        } else {
+          $$('.hero-subtitle, .cta-button').forEach(e => e.style.opacity = 1);
+        }
+        if (window.gsap && window.ScrollTrigger) {
+          gsap.registerPlugin(ScrollTrigger);
+          gsap.utils.toArray('.section-title-reveal').forEach(title => {
+            gsap.from(title.querySelectorAll('.char'), { scrollTrigger: { trigger: title, start: "top 85%", toggleActions: "play none none none" }, opacity: 0, y: 50, rotateZ: 8, stagger: 0.04, ease: "back.out(1.7)" });
+          });
+
+          gsap.to("#p5-header-canvas", {
+            opacity: 0.2,
+            scrollTrigger: { trigger: "body", start: "top top", end: "bottom top", scrub: true }
+          });
+        }
+      });
+
+      // magnetic links
+      safe(() => {
+        $$('.magnetic-link').forEach(el => {
+          let rect = null, hover = false;
+          el.addEventListener('mouseenter', () => { rect = el.getBoundingClientRect(); hover = true; });
+          el.addEventListener('mouseleave', () => { hover = false; if (window.anime) anime({ targets: el, translateX: 0, translateY: 0, duration: 300, easing: 'easeOutElastic(1,.6)' }); else el.style.transform = ''; });
+          window.addEventListener('mousemove', e => {
+            if (!hover || !rect) return;
+            const x = (e.clientX - (rect.left + rect.width / 2)) * 0.22;
+            const y = (e.clientY - (rect.top + rect.height / 2)) * 0.18;
+            if (window.anime) anime({ targets: el, translateX: x, translateY: y, duration: 100, easing: 'linear' }); else el.style.transform = `translate(${x}px,${y}px)`;
+          });
+        });
+      });
+
+    // improved timeline scroll
+    safe(() => {
+      if (!window.gsap || !window.ScrollTrigger) return;
+      gsap.registerPlugin(ScrollTrigger);
+
+      ScrollTrigger.matchMedia({
+        "(min-width: 769px)": function() {
+          const steps = gsap.utils.toArray(".story-step");
+          const timelineEl = document.querySelector(".story-timeline");
+          const progressEl = document.getElementById("timeline-progress");
+          const nodes = gsap.utils.toArray(".timeline-node");
+
+          // Set initial state for animations
+          steps.forEach(step => {
+            gsap.set(step.querySelectorAll('h3, p'), { y: 30, opacity: 0 });
+          });
+
+          ScrollTrigger.create({
+            trigger: ".scrolly-story",
+            start: "top top",
+            end: "bottom bottom",
+            pin: timelineEl,
+            scrub: 1,
+            onUpdate: self => {
+              gsap.to(progressEl, { height: `${self.progress * 100}%`, ease: "none" });
+            }
+          });
+
+          steps.forEach((step, i) => {
+            ScrollTrigger.create({
+              trigger: step,
+              start: "top center",
+              end: "center center",
+              onEnter: () => {
+                gsap.to(step.querySelectorAll('h3, p'), { opacity: 1, y: 0, stagger: 0.15, ease: "power2.out" });
+                nodes.forEach((node, nodeIndex) => node.classList.toggle('is-active', nodeIndex <= i));
+              },
+              onLeave: () => {
+                gsap.to(step.querySelectorAll('h3, p'), { opacity: 0, y: -30, stagger: 0.1, ease: "power2.in" });
+              },
+              onEnterBack: () => {
+                gsap.to(step.querySelectorAll('h3, p'), { opacity: 1, y: 0, stagger: 0.15, ease: "power2.out" });
+                nodes.forEach((node, nodeIndex) => node.classList.toggle('is-active', nodeIndex <= i));
+              },
+              onLeaveBack: () => {
+                gsap.to(step.querySelectorAll('h3, p'), { opacity: 0, y: 30, stagger: 0.1, ease: "power2.in" });
+                nodes.forEach((node, nodeIndex) => node.classList.toggle('is-active', nodeIndex < i));
+              }
+            });
+          });
+        },
+        "(max-width: 768px)": function() {
+          // Mobile logic can remain simple
+          gsap.utils.toArray(".story-step").forEach((step, i) => {
+            const tl_node = document.querySelector(`.timeline-node[data-step="${i}"]`);
+            ScrollTrigger.create({
+              trigger: step,
+              start: "top 70%",
+              end: "bottom 70%",
+              onToggle: self => {
+                step.classList.toggle('is-active', self.isActive);
+                if(tl_node) tl_node.classList.toggle('is-active', self.isActive);
+              }
+            });
+          });
+        }
+      });
+    });
+
+      // modal logic (unchanged)
+      safe(() => {
+        const overlay = $("#modal-overlay"); const modal = $("#modal"); if (!overlay || !modal) return;
+        const nameEl = $("#modal-name"), roleEl = $("#modal-role"), descEl = $("#modal-desc"), photoEl = $("#modal-photo"), awardsEl = $("#modal-awards");
+        const show = data => {
+          if (!data) return; nameEl.textContent = data.name || ''; roleEl.textContent = data.role || ''; descEl.textContent = data.desc || ''; photoEl.src = data.photo || 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=500&q=80'; awardsEl.innerHTML = '';
+          if (data.awards && data.awards.length) { const h = document.createElement('h3'); h.textContent = 'Awards & Fellowships'; const ul = document.createElement('ul'); data.awards.forEach(a => { const li = document.createElement('li'); li.textContent = a; ul.appendChild(li); }); awardsEl.appendChild(h); awardsEl.appendChild(ul); }
+          anime({ targets: [overlay, modal], opacity: [0, 1], duration: 450, begin: () => { overlay.style.pointerEvents = 'auto'; modal.style.pointerEvents = 'auto'; overlay.style.display = 'block'; } });
+          safe(() => $("#modal-close").focus());
+        };
+        const hide = () => { anime({ targets: [overlay, modal], opacity: [1, 0], duration: 350, complete: () => { overlay.style.pointerEvents = 'none'; overlay.style.display = 'none'; modal.style.pointerEvents = 'none'; } }); };
+        $$('.team-card').forEach(card => card.addEventListener('click', () => { const id = card.dataset.memberId; const data = (window.teamData && window.teamData[id]) || (window.__TRIP_TEAM && window.__TRIP_TEAM[id]) || null; if (data) show(data); else show({ name: card.querySelector('h3') ? card.querySelector('h3').textContent.trim() : 'Team member', role: '', desc: '', awards: [] }); }));
+        $("#modal-close")?.addEventListener('click', hide); overlay.addEventListener('click', e => { if (e.target === overlay) hide(); }); document.addEventListener('keydown', e => { if (e.key === 'Escape') hide(); });
+      });
+
+      // Mol* init & loader
+      (async function molstarInit() {
+        try {
+          function waitForMolstar(cb) { if (window.molstar && window.molstar.Viewer) return cb(); setTimeout(() => waitForMolstar(cb), 100); }
+          waitForMolstar(async () => {
+            const container = document.getElementById('molstar-viewer'); if (!container) { console.warn('No Mol* viewer container found.'); return; }
+            if (window.__TRIP_MOLSTAR_VIEWER && window.__TRIP_MOLSTAR_VIEWER.destroy) { window.__TRIP_MOLSTAR_VIEWER.destroy(); }
+            const viewer = await window.molstar.Viewer.create(container, { layoutIsExpanded: false, layoutShowControls: false, viewportShowExpand: false, viewportShowSelectionMode: false, stageBackground: 'rgba(255,255,255,0.05)' });
+            window.__TRIP_MOLSTAR_VIEWER = viewer;
+            window.loadMolecule = async (pdbId) => {
+              if (!pdbId || !viewer) { console.warn('Cannot load molecule (missing id or viewer)'); return; }
+              await viewer.loadPdb(pdbId);
+              if (viewer.plugin && viewer.plugin.canvas3d) { viewer.plugin.canvas3d.camera.reset(); viewer.plugin.canvas3d.setProps({ camera: { reset: true } }); viewer.plugin.canvas3d.spin = true; viewer.plugin.canvas3d.spinSpeed = 0.2; }
+              console.log('Mol* loaded', pdbId);
+            };
+            window.loadMolecule('6BPQ');
+          });
+        } catch (e) { console.error('Mol* initialization failed', e); }
+      })();
+
+      // create fireflies
+      safe(() => { if (!document.querySelector('.firefly')) { for (let i = 0; i < 20; i++) { const f = document.createElement('div'); f.className = 'firefly'; const size = (Math.random() * 4 + 2).toFixed(2) + 'px'; f.style.width = size; f.style.height = size; f.style.top = (Math.random() * 100) + '%'; f.style.left = (Math.random() * 100) + '%'; f.style.animationDuration = (3 + Math.random() * 4) + 's'; document.body.appendChild(f); } } });
+
+      // Cursor light effect
+      safe(() => {
+        let cursorLight = $('#cursor-light');
+        if (!cursorLight) { cursorLight = document.createElement('div'); cursorLight.id = 'cursor-light'; document.body.appendChild(cursorLight); }
+        window.addEventListener('mousemove', e => { if (!window.gsap) { cursorLight.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`; return; } gsap.to(cursorLight, { x: e.clientX - 300, y: e.clientY - 300, duration: 0.45, ease: 'power2.out' }); });
+      });
+
+      // --- JAVASCRIPT for Ghibli Sparkle Effect (Corrected) ---
+      safe(() => {
+        const logo = document.querySelector('.logo');
+        if (!logo || !window.anime) return;
+
+        // avoid double-binding
+        if (logo.dataset.ghibliSparkleBound) return;
+        logo.dataset.ghibliSparkleBound = '1';
+
+        logo.addEventListener('mouseenter', () => {
+          const createSparkle = () => {
+            const sparkle = document.createElement('span');
+            sparkle.className = 'sparkle';
+            logo.appendChild(sparkle);
+
+            anime({
+              targets: sparkle,
+              left: `${anime.random(0, 100)}%`,
+              top: `${anime.random(0, 100)}%`,
+              scale: [0, anime.random(2, 4)],
+              opacity: [{ value: 1, duration: 300 }, { value: 0, duration: 500 }],
+              easing: 'easeOutExpo',
+              duration: anime.random(800, 1200),
+              complete: () => {
+                if (logo.contains(sparkle)) {
+                  logo.removeChild(sparkle);
+                }
+              }
+            });
+          };
+
+          // Create a quick burst of sparkles
+          for (let i = 0; i < 5; i++) {
+            setTimeout(createSparkle, i * 80);
+          }
+        });
+      });
+
+      console.log('TR(i)P Lab script booted (cleaned)');
+    });
+    </script>
+  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+  <script>
+    AOS.init();
+  </script>
+</body>
+</html>

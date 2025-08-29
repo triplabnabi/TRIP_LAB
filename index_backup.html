@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TR(i)P Lab | The Grand Synthesis Edition</title>
+
+  <link rel="stylesheet" href="https://molstar.org/viewer/molstar.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --primary-background:#1A202C; --content-background:#2D3748;
+      --main-text-color:#A0AEC0; --header-color:#FFFFFF;
+      --accent-color:#F6E05E; --subtle-border:#4A5568;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;line-height:1.8;color:var(--main-text-color);background:var(--primary-background);}
+
+    #p5-header-canvas{position:fixed;top:0;left:0;width:100%;height:140px;z-index:1;opacity:0.6;pointer-events:none}
+    header{position:fixed;top:0;left:0;right:0;z-index:1000;padding:1.5rem 0}
+    nav{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:0 2rem}
+    .logo{font-size:1.5rem;font-weight:700;color:var(--header-color);background:rgba(45,55,72,0.7);backdrop-filter:blur(10px);padding:.5rem 1.5rem;border-radius:8px;box-shadow:0 5px 15px rgba(0,0,0,.2)}
+    .logo .logo-i{color:var(--accent-color);font-style:italic}
+    .nav-links{display:flex;gap:1rem;list-style:none}
+    .nav-links a{text-decoration:none;color:var(--header-color);font-weight:600;padding:.5rem 1rem;border-radius:8px;background:rgba(45,55,72,0.7);backdrop-filter:blur(10px);box-shadow:0 5px 15px rgba(0,0,0,.2);transition:all .3s}
+    .nav-links a:hover{background:var(--content-background);color:var(--accent-color);transform:translateY(-3px)}
+
+    main{position:relative;z-index:2}
+    .content-wrapper{background:var(--primary-background);margin-top:30vh}
+    .container{max-width:1100px;margin:0 auto;padding:0 2rem}
+    section{padding:5rem 0}
+
+    .hero{text-align:center;padding:6rem 0;min-height:70vh;display:flex;justify-content:center;align-items:center}
+    .hero h1{font-size:3.8rem;font-weight:600;color:var(--header-color);margin-bottom:1.5rem}
+    .hero h1 .char{display:inline-block;opacity:0}
+    .hero p{font-size:1.25rem;margin-bottom:2rem;max-width:700px;margin-left:auto;margin-right:auto;opacity:0}
+    .cta-button{background:var(--accent-color);color:#1A202C;padding:1rem 2.5rem;border:none;border-radius:8px;font-size:1.1rem;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;opacity:0}
+    .cta-button:hover{transform:scale(1.05);}
+
+    .section-title{text-align:center;font-size:2.8rem;font-weight:600;color:var(--header-color);margin-bottom:3rem}
+    .research-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
+
+    .protein-container{border-radius:16px;overflow:hidden;position:relative;height:550px;background:var(--content-background)}
+    #molstar-viewer{width:100%;height:100%;position:relative;background:transparent}
+
+    .team{background:var(--content-background)}
+    .team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem}
+    .team-card{background:#4A5568;border-radius:12px;padding:2rem;text-align:center;border:1px solid var(--subtle-border);cursor:pointer;transition:all .3s}
+    .team-card:hover{transform:translateY(-10px);box-shadow:0 20px 40px rgba(0,0,0,.3)}
+    .pi-card{grid-column:1/-1;display:grid;grid-template-columns:250px 1fr;gap:3rem;align-items:center;padding:3rem;text-align:left;}
+    .pi-photo{width:250px;height:250px;border-radius:50%;object-fit:cover}
+    .pi-bio h2{color:var(--header-color);margin-bottom:.5rem}
+    .pi-bio .pi-role{color:var(--accent-color);font-weight:700;font-size:1.2rem;margin-bottom:1rem}
+
+    .team-photo{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,var(--accent-color),#F6AD5E);margin:0 auto 1.5rem;display:flex;align-items:center;justify-content:center;color:#1A202C;font-size:2rem;font-weight:bold}
+    .team-card h3{color:var(--header-color);margin-bottom:.5rem}
+
+    /* vertical timeline */
+    .scrolly-story{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:flex-start;padding:10vh 0}
+    .story-text{position:relative;z-index:2;padding:0 1rem}
+    .story-step{min-height:80vh;display:flex;flex-direction:column;justify-content:center;}
+    .story-step h3{font-size:2.5rem;color:var(--header-color);margin-bottom:1rem;font-weight:600}
+    .story-step p{font-size:1.1rem;max-width:450px}
+    .story-timeline{position:sticky;top:50vh;transform:translateY(-50%);z-index:1;display:flex;align-items:center;justify-content:center}
+    .timeline-line{position:relative;width:8px;height:520px;background:var(--subtle-border);border-radius:8px}
+    .timeline-progress{position:absolute;top:0;left:0;width:100%;height:0%;background:var(--accent-color);border-radius:8px}
+    .timeline-node{position:absolute;left:50%;transform:translateX(-50%);width:18px;height:18px;border-radius:50%;background:var(--subtle-border);box-shadow:0 6px 12px rgba(0,0,0,.4);transition:background-color .3s ease,transform .3s ease}
+    .timeline-node.is-active{background:var(--accent-color);transform:translateX(-50%) scale(1.2)}
+    .timeline-node[data-step="0"]{top:10%}
+    .timeline-node[data-step="1"]{top:50%}
+    .timeline-node[data-step="2"]{top:90%}
+
+    #modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);backdrop-filter:blur(5px);z-index:2000;opacity:0;pointer-events:none;display:none}
+    #modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:700px;background:var(--content-background);border-radius:12px;padding:3rem;max-height:80vh;overflow-y:auto;opacity:0;pointer-events:none;border:1px solid var(--subtle-border)}
+    #modal-close{position:absolute;top:15px;right:20px;font-size:2rem;cursor:pointer;color:var(--header-color)}
+    #modal-content{display:flex;flex-direction:column;align-items:center;text-align:center}
+    #modal-photo{width:150px;height:150px;border-radius:50%;object-fit:cover;flex-shrink:0;margin-bottom:1.5rem}
+    #modal-bio h2{color:var(--header-color)}
+    #modal-bio .role{color:var(--accent-color);font-weight:700;font-size:1.1rem;margin-bottom:1rem}
+    #modal-bio p{text-align:left}
+    #modal-awards{margin-top:1.5rem;width:100%;text-align:left}
+    #modal-awards h3{font-size:1.1rem;color:var(--header-color);border-bottom:2px solid var(--subtle-border);padding-bottom:.5rem}
+    #modal-awards ul{list-style:none;padding:0;margin-top:1rem}
+    #modal-awards li{margin-bottom:.5rem;padding-left:1.5rem;position:relative}
+    #modal-awards li::before{content:'★';position:absolute;left:0;color:var(--accent-color)}
+
+    .publications{background:var(--primary-background); border-bottom: 1px solid var(--subtle-border);}
+    .pub-list{max-width:900px;margin:0 auto}
+    .pub-item{background:var(--content-background);padding:2rem;margin-bottom:1.5rem;border-radius:12px;border-left:4px solid var(--accent-color)}
+    .pub-item h3{color:var(--header-color);margin-bottom:.5rem;font-size:1.2rem}
+    .pub-item a{color:var(--accent-color);text-decoration:none;font-weight:600}
+
+    .firefly{position:fixed;border-radius:50%;pointer-events:none;opacity:.9;box-shadow:0 0 12px rgba(246,224,94,.8);filter:blur(.6px);animation:fireGlow linear infinite}
+    @keyframes fireGlow{0%,100%{transform:translateY(0) scale(1);opacity:.35}50%{transform:translateY(-6px) scale(1.2);opacity:1}}
+
+    footer{background:var(--header-color);color:var(--primary-background);text-align:center;padding:3rem 0}
+
+    .mobile-nav-toggle { display: none; }
+    @media (max-width: 768px) {
+      section { padding: 3rem 1rem; }
+      .hero h1 { font-size: 2.5rem; }
+      .section-title { font-size: 2rem; }
+      .research-grid, .scrolly-story, .pi-card { grid-template-columns: 1fr; }
+      .pi-card { text-align: center; }
+      .pi-photo { margin: 0 auto; }
+      .story-timeline { position: relative; top: auto; transform: none; padding: 4rem 0; margin: 0 auto; }
+      .story-step { min-height: auto; padding: 2rem 0; }
+      .nav-links { position: fixed; z-index: 1500; inset: 0 0 0 30%; flex-direction: column; padding: min(20vh, 10rem) 2rem; gap: 2rem; background: rgba(26, 32, 44, 0.95); backdrop-filter: blur(10px); transform: translateX(100%); transition: transform 350ms ease-out; }
+      .nav-links[data-visible="true"] { transform: translateX(0%); }
+      .mobile-nav-toggle { display: block; position: absolute; top: 2rem; right: 2rem; z-index: 2000; border: none; background: transparent; cursor: pointer; }
+      .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+      .hamburger-box { display: inline-block; position: relative; width: 30px; height: 24px; }
+      .hamburger-inner, .hamburger-inner::before, .hamburger-inner::after { position: absolute; width: 30px; height: 3px; background-color: var(--header-color); border-radius: 3px; transition: transform 0.22s cubic-bezier(0.55, 0.055, 0.675, 0.19); }
+      .hamburger-inner { top: 50%; transform: translateY(-50%); }
+      .mobile-nav-toggle[aria-expanded="true"] .hamburger-inner { transform: rotate(225deg); transition-delay: 0.12s; transition-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1); }
+      .hamburger-inner::before, .hamburger-inner::after { content: ''; display: block; }
+      .hamburger-inner::before { top: -10px; }
+      .hamburger-inner::after { bottom: -10px; }
+      .mobile-nav-toggle[aria-expanded="true"] .hamburger-inner::before { top: 0; transform: rotate(-90deg); opacity: 0; }
+      .mobile-nav-toggle[aria-expanded="true"] .hamburger-inner::after { bottom: 0; transform: rotate(-90deg); }
+      .nav-links a { background: transparent; backdrop-filter: none; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="p5-header-canvas"></div>
+
+  <header>
+    <nav>
+      <div class="logo">TR<span class="logo-i">(i)</span>P Lab</div>
+      <button class="mobile-nav-toggle" aria-controls="nav-links" aria-expanded="false">
+        <span class="sr-only">Menu</span>
+        <span class="hamburger-box">
+          <span class="hamburger-inner"></span>
+        </span>
+      </button>
+      <ul class="nav-links" id="nav-links" data-visible="false">
+        <li><a href="#home" class="magnetic-link">Home</a></li>
+        <li><a href="#research" class="magnetic-link">Research</a></li>
+        <li><a href="#team" class="magnetic-link">Team</a></li>
+        <li><a href="#publications" class="magnetic-link">Publications</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="content-wrapper">
+    <main>
+      <section id="home" class="hero">
+        <div class="container">
+          <div>
+            <h1 class="hero-title">Promoting Food as Medicine</h1>
+            <p class="hero-subtitle">Our objective is to provide scientific mechanisms to ancient beliefs about the health benefits of dietary constituents.</p>
+            <a href="#research" class="cta-button magnetic-link">Explore Our Discoveries</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="research" class="research">
+        <div class="container">
+          <div class="research-grid">
+            <div class="research-content">
+              <h2 class="section-title section-title-reveal">Contribution to Scientific Advancement</h2>
+              <p>Our lab provides molecular proofs for the health benefits of food constituents like capsaicin, cinnamaldehyde, and menthol, blending ancient wisdom with modern science.</p>
+            </div>
+            <div class="protein-container">
+              <div id="molstar-viewer"></div>
+            </div>
+          </div>
+
+          <div class="scrolly-story">
+            <div class="story-text">
+              <div id="story-step-1" class="story-step"><h3>Capsaicin</h3><p>We were the first to report that capsaicin increases <em>Akkermansia muciniphila</em>, linking it to a powerful anti-obesity effect.</p></div>
+              <div id="story-step-2" class="story-step"><h3>Gut Microbiome</h3><p>We established that sweet prebiotics like IMO improve metabolic health by boosting good bacteria.</p></div>
+              <div id="story-step-3" class="story-step"><h3>Menthol</h3><p>Our research delves into how cooling compounds like menthol interact with TRP channels to produce their signature sensory effects.</p></div>
+            </div>
+
+            <div class="story-timeline">
+              <div class="timeline-line">
+                <div class="timeline-progress" id="timeline-progress"></div>
+                <div class="timeline-node" data-step="0" id="node-1"></div>
+                <div class="timeline-node" data-step="1" id="node-2"></div>
+                <div class="timeline-node" data-step="2" id="node-3"></div>
+              </div>
+            </div>
+          </div>
+          <div style="text-align:center; margin-top:3rem;"><a href="research.html" class="cta-button magnetic-link" style="opacity:1; transform:none;">Explore More Research</a></div>
+        </div>
+      </section>
+
+      <section id="team" class="team">
+        <div class="container">
+          <h2 class="section-title section-title-reveal">Meet the Team</h2>
+          <div class="team-grid">
+            <div class="team-card pi-card" data-member-id="pi">
+              <img class="pi-photo" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=500&q=80" alt="Dr. Mahendra Bishnoi">
+              <div class="pi-bio">
+                <h2>Dr. Mahendra Bishnoi</h2>
+                <div class="pi-role">Scientist F | Diet/Nutrition & Receptor Pharmacology</div>
+                <p>Click to learn more about Dr. Bishnoi's research, training, and achievements.</p>
+              </div>
+            </div>
+          </div>
+
+          
+          <div style="text-align:center; margin-top:3rem;"><a href="team.html" class="cta-button magnetic-link" style="opacity:1; transform:none;">Meet The Entire Team</a></div>
+        </div>
+      </section>
+
+      <section id="publications" class="publications">
+        <div class="container">
+          <h2 class="section-title section-title-reveal">Key Publications</h2>
+          <div class="pub-list">
+            <div class="pub-item">
+              <h3>Isolation, characterization and anti-inflammatory mechanism of probiotics...</h3>
+              <div class="authors">Khanna S, Bishnoi M, et al. (2020) <em>World J Microbiol Biotechnol.</em></div>
+              <a href="https://doi.org/10.1007/s11274-020-02852-z" target="_blank">Read Publication</a>
+            </div>
+            <div class="pub-item">
+              <h3>Anthocyanin-biofortified Colored Wheat Prevents High Fat Diet-induced Alterations...</h3>
+              <div class="authors">Sharma S, Khare P, et al. (2020) <em>Mol Nutr Food Res.</em></div>
+              <a href="https://doi.org/10.1002/mnfr.201900999" target="_blank">Read Publication</a>
+            </div>
+            <div class="pub-item">
+              <h3>Pharmacological inhibition of TRPM2 Channels Attenuates Diabetes-induced Cognitive Deficits...</h3>
+              <div class="authors">Thapak P, Bishnoi M, Sharma SS. (2020) <em>Curr Neurovasc Res.</em></div>
+              <a href="https://doi.org/10.2174/1567202617666200415142211" target="_blank">Read Publication</a>
+            </div>
+          </div>
+          <div style="text-align:center;margin-top:2rem;"><a href="#" class="cta-button magnetic-link">View All Publications</a></div>
+        </div>
+      </section>
+    </main>
+
+    <footer id="contact"><div class="container"><p>&copy; 2025 TR(i)P Lab</p></div></footer>
+  </div>
+
+  <div id="modal-overlay">
+    <div id="modal">
+      <div id="modal-close" tabindex="0">&times;</div>
+      <div id="modal-content">
+        <img id="modal-photo" src="" alt="Member photo">
+        <div id="modal-bio">
+          <h2 id="modal-name"></h2>
+          <div id="modal-role" class="role"></div>
+          <p id="modal-desc"></p>
+          <div id="modal-awards"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mol* core -->
+  <script type="text/javascript" src="https://molstar.org/viewer/molstar.js"></script>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const $ = s => document.querySelector(s);
+    const $$ = s => Array.from(document.querySelectorAll(s));
+    const safe = fn => { try { return fn(); } catch (e) { console.warn(e); } };
+
+    window.teamData = {
+      pi: {
+        name: "Dr. Mahendra Bishnoi",
+        role: "Scientist F | Diet/Nutrition & Receptor Pharmacology",
+        photo: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=500&q=80",
+        desc: "Dr. Bishnoi leads the lab with a focus on providing rigorous scientific mechanisms to ancient beliefs about the health benefits of dietary constituents. His research utilizes nutrigenomics and receptor-based approaches to promote 'food as medicine' and address global nutritional challenges. Before joining in 2011, he completed postdoctoral fellowships in pain and diabetes research at Southern Illinois University and in nicotine addiction at the University of Florida's McKnight Brain Institute. His lab was the first to report the anti-obesity effects of capsaicin via its influence on Akkermansia muciniphila and has established the metabolic benefits of sweet prebiotics.",
+        awards: [
+          "Selected for Early and Mid Career Researcher (EMCR)-2017 fellowship by INSA",
+          "Recipient of DST-SERB, Govt. of India travel grant",
+          "Conferred with JEWEL OF INDIA AWARD",
+          "Finalist of INSA Young Scientist Medal",
+          "Recipient of Melvin Yahr award (x2)",
+          "University Gold medal for M. Pharmacy (2004)"
+        ]
+      },
+      member1: { name: "Dr. Anna Rodriguez", role: "Postdoctoral Fellow", photo: "", desc: "Anna is a computational biologist developing molecular dynamics simulations.", awards: [] },
+      member2: { name: "Michael Kim", role: "PhD Student", photo: "", desc: "Michael is investigating TRPM8 pharmacology.", awards: [] },
+      member3: { name: "Dr. James Liu", role: "Senior Research Scientist", photo: "", desc: "James is an electrophysiologist expert in patch-clamp techniques.", awards: [] }
+    };
+
+    // P5 header
+    safe(() => {
+      if (!window.p5) { console.warn('p5 not loaded'); return; }
+      new p5(p => {
+        const H = 140; let neurons = [];
+        const NUM = 24;
+        p.setup = () => {
+          const c = p.createCanvas(p.windowWidth, H).parent('p5-header-canvas');
+          c.style('display', 'block');
+          for (let i = 0; i < NUM; i++) {
+            neurons.push({
+              pos: p.createVector(p.random(p.width), p.random(p.height)),
+              vel: p5.Vector.random2D().mult(p.random(0.1, 0.5)),
+              r: p.random(2, 6),
+              phase: p.random(p.TWO_PI)
+            });
+          }
+        };
+        p.draw = () => {
+          p.clear();
+          neurons.forEach((n, idx) => {
+            n.pos.add(n.vel);
+            if (n.pos.x > p.width) n.pos.x = 0;
+            if (n.pos.x < 0) n.pos.x = p.width;
+            if (n.pos.y > p.height) n.pos.y = 0;
+            if (n.pos.y < 0) n.pos.y = p.height;
+            const glow = (p.sin(p.frameCount * 0.05 + n.phase) + 1) * 120;
+            p.noStroke();
+            p.fill(246, 224, 94, glow);
+            p.ellipse(n.pos.x, n.pos.y, n.r);
+            for (let j = idx + 1; j < neurons.length; j++) {
+              const other = neurons[j];
+              const d = n.pos.dist(other.pos);
+              if (d < 140) {
+                const alpha = p.map(d, 0, 140, 80, 0);
+                p.stroke(246, 224, 94, alpha);
+                p.strokeWeight(0.8);
+                p.line(n.pos.x, n.pos.y, other.pos.x, other.pos.y);
+              }
+            }
+          });
+        };
+        p.windowResized = () => p.resizeCanvas(p.windowWidth, H);
+      });
+    });
+
+    // Mobile nav toggle
+    safe(() => {
+      const navToggle = $('.mobile-nav-toggle');
+      const navLinks = $('.nav-links');
+
+      navToggle.addEventListener('click', () => {
+        const isVisible = navLinks.getAttribute('data-visible') === 'true';
+        navToggle.setAttribute('aria-expanded', !isVisible);
+        navLinks.setAttribute('data-visible', !isVisible);
+      });
+    });
+
+    // cinematic reveals
+    safe(() => {
+      $$('.hero-title, .section-title-reveal').forEach(t => { t.innerHTML = t.textContent.replace(/\S/g, "<span class='char'>$&</span>"); });
+      if (window.anime) {
+        anime.timeline({ easing: 'easeOutExpo' })
+          .add({ targets: '.hero-title .char', translateY: [100, 0], opacity: [0, 1], delay: anime.stagger(30, { start: 300 }) })
+          .add({ targets: '.hero-subtitle, .cta-button', translateY: [40, 0], opacity: [0, 1], duration: 700 }, '-=700');
+      } else {
+        $$('.hero-subtitle, .cta-button').forEach(e => e.style.opacity = 1);
+      }
+      if (window.gsap && window.ScrollTrigger) {
+        gsap.registerPlugin(ScrollTrigger);
+        gsap.utils.toArray('.section-title-reveal').forEach(title => {
+          gsap.from(title.querySelectorAll('.char'), { scrollTrigger: { trigger: title, start: "top 85%", toggleActions: "play none none none" }, opacity: 0, y: 50, rotateZ: 8, stagger: 0.04, ease: "back.out(1.7)" });
+        });
+      }
+    });
+
+    // magnetic links
+    safe(() => {
+      $$('.magnetic-link').forEach(el => {
+        let rect = null, hover = false;
+        el.addEventListener('mouseenter', () => { rect = el.getBoundingClientRect(); hover = true });
+        el.addEventListener('mouseleave', () => { hover = false; if (window.anime) anime({ targets: el, translateX: 0, translateY: 0, duration: 300, easing: 'easeOutElastic(1,.6)' }); else el.style.transform = ''; });
+        window.addEventListener('mousemove', e => {
+          if (!hover || !rect) return;
+          const x = (e.clientX - (rect.left + rect.width / 2)) * 0.22;
+          const y = (e.clientY - (rect.top + rect.height / 2)) * 0.18;
+          if (window.anime) anime({ targets: el, translateX: x, translateY: y, duration: 100, easing: 'linear' }); else el.style.transform = `translate(${x}px,${y}px)`;
+        });
+      });
+    });
+
+    // improved timeline scroll
+    safe(() => {
+      if (!window.gsap || !window.ScrollTrigger) return;
+      gsap.registerPlugin(ScrollTrigger);
+
+      ScrollTrigger.matchMedia({
+        "(min-width: 769px)": function() {
+          const steps = gsap.utils.toArray(".story-step");
+          const timelineEl = $(".story-timeline");
+          const progressEl = $("#timeline-progress");
+          const nodes = gsap.utils.toArray(".timeline-node");
+
+          steps.forEach(step => {
+            gsap.set(step.querySelectorAll('h3, p'), { y: 30, opacity: 0 });
+          });
+
+          ScrollTrigger.create({
+            trigger: ".scrolly-story",
+            start: "top top",
+            end: "bottom bottom",
+            pin: timelineEl,
+            scrub: 1,
+            onUpdate: self => {
+              gsap.to(progressEl, { height: `${self.progress * 100}%`, ease: "none" });
+            }
+          });
+
+          steps.forEach((step, i) => {
+            ScrollTrigger.create({
+              trigger: step,
+              start: "top center",
+              end: "center center",
+              onEnter: () => {
+                gsap.to(step.querySelectorAll('h3, p'), { opacity: 1, y: 0, stagger: 0.15, ease: "power2.out" });
+                nodes.forEach((node, nodeIndex) => node.classList.toggle('is-active', nodeIndex <= i));
+              },
+              onLeave: () => {
+                gsap.to(step.querySelectorAll('h3, p'), { opacity: 0, y: -30, stagger: 0.1, ease: "power2.in" });
+              },
+              onEnterBack: () => {
+                gsap.to(step.querySelectorAll('h3, p'), { opacity: 1, y: 0, stagger: 0.15, ease: "power2.out" });
+                nodes.forEach((node, nodeIndex) => node.classList.toggle('is-active', nodeIndex <= i));
+              },
+              onLeaveBack: () => {
+                gsap.to(step.querySelectorAll('h3, p'), { opacity: 0, y: 30, stagger: 0.1, ease: "power2.in" });
+                nodes.forEach((node, nodeIndex) => node.classList.toggle('is-active', nodeIndex < i));
+              }
+            });
+          });
+        },
+        "(max-width: 768px)": function() {
+          gsap.utils.toArray(".story-step").forEach((step, i) => {
+            gsap.set(step.querySelectorAll('h3, p'), { y: 0, opacity: 1 });
+            const tl_node = $(".timeline-node[data-step=\"${i}\"]");
+            ScrollTrigger.create({
+              trigger: step,
+              start: "top 70%",
+              end: "bottom 70%",
+              onToggle: self => {
+                step.classList.toggle('is-active', self.isActive);
+                if(tl_node) tl_node.classList.toggle('is-active', self.isActive);
+              }
+            });
+          });
+        }
+      });
+    });
+
+    // modal logic
+    safe(() => {
+      const overlay = $("#modal-overlay");
+      const modal = $("#modal");
+      if (!overlay || !modal) return;
+      const nameEl = $("#modal-name"), roleEl = $("#modal-role"), descEl = $("#modal-desc"), photoEl = $("#modal-photo"), awardsEl = $("#modal-awards");
+      const show = data => {
+        if (!data) return;
+        nameEl.textContent = data.name || '';
+        roleEl.textContent = data.role || '';
+        descEl.textContent = data.desc || '';
+        photoEl.src = data.photo || 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=500&q=80';
+        awardsEl.innerHTML = '';
+        if (data.awards && data.awards.length) {
+          const h = document.createElement('h3'); h.textContent = 'Awards & Fellowships';
+          const ul = document.createElement('ul');
+          data.awards.forEach(a => { const li = document.createElement('li'); li.textContent = a; ul.appendChild(li); });
+          awardsEl.appendChild(h); awardsEl.appendChild(ul);
+        }
+        anime({ targets: [overlay, modal], opacity: [0, 1], duration: 450, begin: () => { overlay.style.pointerEvents = 'auto'; modal.style.pointerEvents = 'auto'; overlay.style.display = 'block'; } });
+        safe(() => $("#modal-close").focus());
+      };
+      const hide = () => {
+        anime({ targets: [overlay, modal], opacity: [1, 0], duration: 350, complete: () => { overlay.style.pointerEvents = 'none'; overlay.style.display = 'none'; modal.style.pointerEvents = 'none'; } });
+      };
+      $$('.team-card').forEach(card => card.addEventListener('click', () => {
+        const id = card.dataset.memberId;
+        const data = (window.teamData && window.teamData[id]) || (window.__TRIP_TEAM && window.__TRIP_TEAM[id]) || null;
+        if (data) show(data);
+        else show({ name: card.querySelector('h3') ? card.querySelector('h3').textContent.trim() : 'Team member', role: '', desc: '', awards: [] });
+      }));
+      $("#modal-close")?.addEventListener('click', hide);
+      overlay.addEventListener('click', e => { if (e.target === overlay) hide(); });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') hide(); });
+    });
+
+    // Mol* init & loader
+    (async function molstarInit() {
+      try {
+        if (!window.molstar) {
+          console.error('Mol* library not found.');
+          return;
+        }
+        const container = $("#molstar-viewer");
+        if (!container) {
+          console.warn('No Mol* viewer container found.');
+          return;
+        }
+
+        const viewer = await molstar.Viewer.create(container, {
+          layoutIsExpanded: false,
+          layoutShowControls: false,
+          viewportShowExpand: false,
+          viewportShowSelectionMode: false,
+          stageBackground: 'transparent'
+        });
+
+        window.__TRIP_MOLSTAR_VIEWER = viewer;
+
+        const loadMolecule = async (pdbId) => {
+          if (!pdbId || !viewer) {
+            console.warn('Cannot load molecule (missing id or viewer)');
+            return;
+          }
+          await viewer.loadPdb(pdbId);
+          const canvas3d = viewer.plugin.canvas3d;
+          if (canvas3d) {
+              canvas3d.camera.reset();
+              canvas3d.spin = true;
+              canvas3d.spinSpeed = 0.2;
+          }
+          console.log('Mol* loaded', pdbId);
+        };
+        
+        window.loadMolecule = loadMolecule;
+
+        await loadMolecule('6BPQ');
+
+      } catch (e) {
+        console.error('Mol* initialization failed', e);
+      }
+    })();
+
+    // create fireflies if none present
+    safe(() => {
+      if (!document.querySelector('.firefly')) {
+        for (let i = 0; i < 20; i++) {
+          const f = document.createElement('div');
+          f.className = 'firefly';
+          const size = (Math.random() * 4 + 2).toFixed(2) + 'px';
+          f.style.width = size; f.style.height = size;
+          f.style.top = (Math.random() * 100) + '%';
+          f.style.left = (Math.random() * 100) + '%';
+          f.style.animationDuration = (3 + Math.random() * 4) + 's';
+          document.body.appendChild(f);
+        }
+      }
+    });
+
+    console.log('TR(i)P Lab script booted');
+  });
+  </script>
+</body>
+</html>

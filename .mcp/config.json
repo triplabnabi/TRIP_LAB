@@ -1,0 +1,44 @@
+{
+"servers": {
+"console-ninja": {
+"command": "powershell.exe",
+"args": [
+"node",
+"$Env:USERPROFILE/.console-ninja/mcp/"
+],
+"type": "stdio"
+},
+"github": {
+"url": "https://api.githubcopilot.com/mcp/",
+"type": "http"
+},
+"huggingface": {
+"url": "https://hf.co/mcp",
+"type": "http"
+},
+"markitdown": {
+"command": "uvx",
+"args": [
+"markitdown-mcp"
+],
+"type": "stdio"
+},
+"imagesorcery": {
+"command": "uvx",
+"args": [
+"imagesorcery-mcp"
+],
+"type": "stdio"
+},
+"context7": {
+           "type": "stdio",
+           "command": "npx",
+           "args": [
+             "-y",
+             " @upstash/context7-mcp",
+             "--api-key",
+             "ctx7sk-c54db502-1d65-40e8-84c4-70686dee0046"
+           ]
+        }
+}
+}
