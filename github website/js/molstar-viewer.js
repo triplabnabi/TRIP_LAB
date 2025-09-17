@@ -42,6 +42,19 @@
           layoutShowLeftPanel: false,
           viewportShowExpand: true,
           viewportShowSelectionMode: false,
+          // Performance optimizations
+          postprocessing: {
+            occlusion: { name: 'off' },
+            shadow: { name: 'off' },
+          },
+        });
+
+        // Further performance optimization
+        this.viewer.plugin.canvas3d.setProps({
+          renderer: {
+            ...this.viewer.plugin.canvas3d.props.renderer,
+            dpr: window.devicePixelRatio < 2 ? window.devicePixelRatio : 1,
+          }
         });
 
         this.setupUIInteractions();
@@ -70,6 +83,11 @@
             this.updateActiveStateVisual(button);
           }
         });
+
+        const tooltip = document.createElement('span');
+        tooltip.className = 'tooltip';
+        tooltip.textContent = button.dataset.tooltip;
+        button.appendChild(tooltip);
       });
     }
 
@@ -92,35 +110,17 @@
         const model = await plugin.builders.structure.createModel(trajectory);
         const structureData = await plugin.builders.structure.createStructure(model);
 
-        // Enhanced surface representation with secondary structure coloring
-        // This makes the TRP channel scientifically informative and visually appealing
-        await plugin.builders.structure.representation.addRepresentation(structureData, {
-            type: 'gaussian-surface',
-            color: 'secondary-structure',
-            colorParams: {
-                helix: { r: 0.1, g: 0.4, b: 0.9 },    // Helices: Blue
-                sheet: { r: 0.9, g: 0.1, b: 0.1 },    // Sheets: Red
-                loop: { r: 0.5, g: 0.5, b: 0.5 }      // Loops: Gray
-            },
-            alpha: 0.3 // Perfect balance: informative yet not overpowering
-        });
-
-        // Add the cartoon representation inside
+        // Simplified cartoon representation for performance
         await plugin.builders.structure.representation.addRepresentation(structureData, {
             type: 'cartoon',
-            color: 'sequence-id'
+            color: 'secondary-structure',
+            size: 'uniform',
+            sizeParams: { value: 0.8 }
         });
 
         plugin.managers.camera.reset();
 
         console.log(`Loaded ${structure.pdbId} (${structure.description})`);
-
-        // 🆕 TRIGGER SPIN ANIMATION AFTER STRUCTURE IS FULLY READY
-        console.log('⏳ Preparing spin animation after structure loads...');
-        setTimeout(() => {
-          console.log('🎬 Starting Cinematic Spin Animation!');
-          this.animateSpinReveal(plugin, 12000); // 12-second slower spin
-        }, 2500); // Wait 2.5 seconds for full structure rendering + centering
 
       } catch (error) {
         console.error(`Failed to load structure ${structure.pdbId}:`, error);
@@ -152,100 +152,7 @@
       activeButton.classList.add('active');
     }
 
-    /**
-     * Create cinematic one-time spin animation to reveal the loaded structure
-     * @param {Object} plugin - Molstar plugin instance
-     * @param {number} duration - Animation duration in milliseconds (default: 12 seconds)
-     */
-    async animateSpinReveal(plugin, duration = 12000) {
-      try {
-        console.log('🎯 Starting ULTRA-smooth cinematic spin animation...');
-
-        const camera = plugin.canvas3d.camera;
-        const rotationSteps = 72; // 72 steps for SILKY-smooth 360° (5° per step)
-        const stepDuration = duration / rotationSteps;
-
-        // Get initial camera position
-        await plugin.managers.camera.reset();
-        let currentSnapshot = camera.getSnapshot();
-
-        console.log(`🎬 CINEMATIC ANIM: ${duration}ms total, ${rotationSteps} steps, ${Math.round(stepDuration)}ms per step`);
-
-        // Store the original position and target
-        const originalPosition = [...currentSnapshot.position];
-        const originalTarget = [...currentSnapshot.target];
-        const originalUp = [...currentSnapshot.up];
-
-        // 🔍 FINE-TUNE CAMERA FOR TRPM8 PERFECT VIEWING
-        // TRPM8 channels (~1100 AA) need optimal zoom for scientific viewing
-        const scientificZoomFactor = 1.5; // 1.5x zoom for perfect channel proximity
-
-        // Move camera to ideal scientific viewing position
-        const scientificPosition = [
-          originalPosition[0] * scientificZoomFactor, // Optimal X-distance
-          originalPosition[1],                         // Standard height
-          originalPosition[2] * scientificZoomFactor  // Optimal Z-distance
-        ];
-
-        // Define molecule center for smooth orbital motion
-        const moleculeCenter = [
-          originalTarget[0],
-          originalTarget[1],
-          originalTarget[2]
-        ];
-
-        console.log(`📸 SCIENTIFIC ZOOM: ${scientificZoomFactor}x - Perfect for TRPM8 channel viewing`);
-        console.log(`🔬 Optimal balance: Shows complete architecture with ideal molecule size`);
-
-        // Animation: Create circular camera motion around the molecule
-        for (let step = 0; step <= rotationSteps; step++) {
-          setTimeout(() => {
-            const angle = (step / rotationSteps) * 2 * Math.PI; // Full 360° in radians
-
-            // Calculate new camera position on circular orbit - ZOOMED OUT
-            const radius = 220 * scientificZoomFactor; // Large orbit for complete TRPM8 view
-            const heightOffset = 20; // Height variation for cinematic feel
-
-            const newPosition = [
-              moleculeCenter[0] + Math.sin(angle) * radius,
-              moleculeCenter[1] + heightOffset,
-              moleculeCenter[2] + Math.cos(angle) * radius
-            ];
-
-            // Create camera snapshot for this frame
-            const stepSnapshot = {
-              position: newPosition,
-              target: originalTarget,
-              up: originalUp
-            };
-
-            // Apply the camera movement
-            plugin.managers.camera.setSnapshot(stepSnapshot, stepDuration / 2);
-
-            // Log progress and completion
-            if (step === rotationSteps) {
-              console.log('✅ Spin animation complete!');
-
-              // Optional: Return to a nice default view after spinning
-              setTimeout(() => {
-                plugin.managers.camera.reset();
-                console.log('🎬 Animation finished - user has camera control');
-              }, stepDuration);
-            }
-
-          }, step * stepDuration);
-        }
-
-      } catch (error) {
-        console.warn('⚠️ Spin animation failed, continuing with default view:', error);
-        // Fallback to basic view if animation fails
-        try {
-          plugin.managers.camera.reset();
-        } catch (e) {
-          console.error('❌ Failed to reset camera after animation error');
-        }
-      }
-    }
+    
 
     showError(message) {
       if (!this.container) return;
