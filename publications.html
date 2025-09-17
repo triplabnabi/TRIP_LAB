@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TRP Lab | Publications</title>
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/publications.css">
+</head>
+<body>
+
+  <div id="page-progress"></div>
+
+  <header>
+    <nav>
+      <div class="logo-container">
+        <div class="logo">
+          TR<div class="logo-divider-line"></div>P Lab
+        </div>
+        <div class="lab-subtitle">
+          <span class="trp-t">T</span>ranslation <span class="trp-r">R</span>esearch <span class="trp-i">I</span>n TR<b class="trp-p">P</b> Channels, Obesity and Metabolism
+        </div>
+      </div>
+      <button class="mobile-nav-toggle" aria-controls="nav-links" aria-expanded="false">
+        <span class="sr-only">Menu</span>
+        <span class="hamburger-box">
+          <span class="hamburger-inner"></span>
+        </span>
+      </button>
+      <ul class="nav-links" id="nav-links" data-visible="false">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="research.html">Research</a></li>
+        <li><a href="team.html">Team</a></li>
+        <li><a href="publications.html">Publications</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="publications-list" class="publications">
+      <div class="container">
+        <h2 class="section-title">Publications</h2>
+        <p class="section-intro">Explore our lab's contributions to the field. You can filter by year or search for specific publications.</p>
+
+        <div class="pub-controls">
+          <div class="pub-search-wrapper">
+            <input type="search" id="pub-search" placeholder="Search by title, author, or keyword...">
+          </div>
+          <div class="pub-filter-wrapper">
+            <select id="year-filter">
+              <option value="all">All Years</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="pub-list-container" class="pub-list"></div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer id="contact">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h2 class="footer-logo">TR|P Laboratory</h2>
+        <p class="footer-description">Advancing the understanding of dietary constituents through rigorous scientific research and molecular mechanisms.</p>
+      </div>
+
+      <div class="footer-section">
+        <h3>Navigation</h3>
+        <ul class="footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="research.html">Research</a></li>
+          <li><a href="team.html">Team</a></li>
+          <li><a href="publications.html">Publications</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h3>Contact Information</h3>
+        <ul class="footer-links">
+          <li>The National Agri-Food Biotechnology Institute (NABI)</li>
+          <li>Knowledge City, Sector 81, Sahibzada Ajit Singh Nagar</li>
+          <li>Punjab 140306, India</li>
+          <li><a href="mailto:contact@trip-lab.org">contact@trip-lab.org</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-copyright-wrapper">
+        <div class="footer-logo-wrapper">
+          <span class="footer-logo">© 2025</span>
+          <div class="footer-divider-line"></div>
+          <span class="footer-logo-text">TR|P Lab</span>
+        </div>
+        <span class="footer-rights">All rights reserved.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/publications.js"></script>
+  <script src="js/publications-list.js"></script>
+  <script src="js/interactive.js"></script>
+
+</body>
+</html>
