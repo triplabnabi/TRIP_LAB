@@ -139,6 +139,8 @@ nav {
   margin-top: 0.5rem;
   max-width: 90%; /* Added max-width for responsiveness */
   box-sizing: border-box; /* Ensure padding is included in width */
+  height: auto; /* Ensure height adjusts to content */
+  min-height: auto; /* Ensure min-height doesn't constrain it */
 }
 
 .logo-container:hover .lab-subtitle {
