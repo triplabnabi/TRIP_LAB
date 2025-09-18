@@ -83,7 +83,8 @@ nav {
 /* Logo Styles */
 .logo-container {
   position: relative;
-  display: inline-block;
+  display: block; /* Changed from inline-block to block */
+  width: 100%; /* Ensure it takes full width */
 }
 
 .logo {
