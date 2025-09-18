@@ -128,15 +128,17 @@ nav {
   text-align: center;
   opacity: 1;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  white-space: nowrap;
-  overflow: visible;
+  /* white-space: nowrap; REMOVED to allow text wrapping */
+  overflow: hidden; /* Changed to hidden to prevent overflow issues */
   z-index: 1000;
   pointer-events: none;
   position: absolute;
-  left: 82%;
+  left: 50%; /* Centered horizontally */
   transform: translateX(-50%) translateY(-12px);
   top: 100%;
   margin-top: 0.5rem;
+  max-width: 90%; /* Added max-width for responsiveness */
+  box-sizing: border-box; /* Ensure padding is included in width */
 }
 
 .logo-container:hover .lab-subtitle {
