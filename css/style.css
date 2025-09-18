@@ -1151,42 +1151,42 @@ footer {
   transform: scale(1.1);
 }
 
-/* Fallback Alternative (Original lab-subtitle) */
+/* Fallback Alternative (Original lab-subtitle) - NOW IDENTICAL TO PRIMARY */
 .lab-subtitle {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 100%;
-  /* min-width: 380px; REMOVED */
-  max-width: 90%; /* Added for responsiveness */
+  font-family: 'EB Garamond', serif;
+  font-size: 1.6rem; /* Professional size - improved readability */
+  font-weight: 700;
+  color: #0e0e0dd9; /* Clean color without !important */
   background: linear-gradient(135deg,
     rgba(0, 191, 255, 0.9) 0%,
     rgba(135, 206, 235, 0.8) 50%,
     rgba(255, 40, 0, 0.9) 100%
   );
-  color: rgb(37, 35, 35);
-  font-size: 1rem;
-  padding: 0.4rem 0.8rem;
-  border-radius: 12px;
-  border: 1px solid rgba(0, 191, 255, 0.3);
-  backdrop-filter: blur(8px);
-  font-weight: 500;
-  opacity: 0;
-  transform: translateX(-50%) translateY(-12px);
+  padding: 0.8rem 1.6rem;
+  border-radius: 15px;
+  border: 2px solid rgba(0, 191, 255, 0.3);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 6px 25px rgba(0, 191, 255, 0.3);
+  text-align: center;
+  opacity: 1;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  /* white-space: nowrap; REMOVED */
-  overflow: visible;
+  /* white-space: nowrap; REMOVED to allow text wrapping */
+  overflow: visible; /* Changed to visible to allow content to expand */
   z-index: 1000;
   pointer-events: none;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  height: auto; /* Ensure height adjusts */
-  min-height: auto; /* Ensure min-height doesn't constrain */
+  position: absolute;
+  left: 50%; /* Centered horizontally */
+  transform: translateX(-50%) translateY(-12px);
+  top: 100%;
+  margin-top: 0.5rem;
+  max-width: 90%; /* Added max-width for responsiveness */
+  box-sizing: border-box; /* Ensure padding is included in width */
+  height: auto; /* Ensure height adjusts to content */
+  min-height: auto; /* Ensure min-height doesn't constrain it */
 }
 
 .logo-container:hover .lab-subtitle {
-  opacity: 1;
-  transform: translateX(-50%) translateY(2px);
-  box-shadow: 0 12px 35px rgba(0, 191, 255, 0.25);
+  transform: translateX(-50%) translateY(0.5rem);
 }
 
 /* Enhanced Logo with Subtitle Animation */
