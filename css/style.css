@@ -138,7 +138,7 @@ nav {
   transform: translateX(-50%) translateY(-12px); /* Initial hidden position */
   top: 100%;
   margin-top: 0.5rem;
-  max-width: 90%; /* Added max-width for responsiveness */
+  max-width: 500px; /* Adjusted max-width for better wrapping */
   box-sizing: border-box; /* Ensure padding is included in width */
   height: auto; /* Ensure height adjusts to content */
   min-height: auto; /* Ensure min-height doesn't constrain it */
