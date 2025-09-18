@@ -1157,7 +1157,8 @@ footer {
   left: 50%;
   transform: translateX(-50%);
   top: 100%;
-  min-width: 380px;
+  /* min-width: 380px; REMOVED */
+  max-width: 90%; /* Added for responsiveness */
   background: linear-gradient(135deg,
     rgba(0, 191, 255, 0.9) 0%,
     rgba(135, 206, 235, 0.8) 50%,
@@ -1173,11 +1174,13 @@ footer {
   opacity: 0;
   transform: translateX(-50%) translateY(-12px);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  white-space: nowrap;
+  /* white-space: nowrap; REMOVED */
   overflow: visible;
   z-index: 1000;
   pointer-events: none;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  height: auto; /* Ensure height adjusts */
+  min-height: auto; /* Ensure min-height doesn't constrain */
 }
 
 .logo-container:hover .lab-subtitle {
